@@ -1,4 +1,4 @@
-# Offensive Server
+# Offser
 
 A simple Express.js server for handling mail-related routes. This project is structured with TypeScript and uses environment variables for configuration.
 
