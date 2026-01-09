@@ -20,7 +20,7 @@ const sendMailHandler = async (req: Request, res: Response, next: NextFunction) 
             html
         });
         res.status(200).json({ message: 'Email sent successfully', info: mailResponse });
-    } catch (error: Error | any) {
+    } catch (error: Error | unknown) {
         return next(error);
     }
 };
