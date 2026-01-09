@@ -1,13 +1,28 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
+import { sendMail } from '../services/mail.service.js';
 
-const sendMail = (req: Request, res: Response) => {
-    const { to, subject, body  } = req.body;
+const sendMailHandler = async (req: Request, res: Response, next: NextFunction) => {
+    const { to, subject, text, html  } = req.body;
 
-    if (!to || !subject || !body) {
-        return res.status(400).json({ message: 'Missing required field(s): to, subject, body' });
+    if (!to) {
+        return res.status(400).json({ message: 'Missing required field: "to"' });
     }
 
-    return res.status(200).send('Mail sent successfully!');
+    if(!subject) {
+        return res.status(400).json({ message: 'Missing required field: "subject"' });
+    }
+
+    try {
+        const mailResponse = await sendMail({
+            to,
+            subject,
+            text,
+            html
+        });
+        res.status(200).json({ message: 'Email sent successfully', info: mailResponse });
+    } catch (error: Error | any) {
+        return next(error);
+    }
 };
 
-export { sendMail };
+export { sendMailHandler };
