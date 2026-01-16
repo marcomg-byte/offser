@@ -4,10 +4,13 @@
     "outDir": "./dist",
 
     // Environment Settings
-    "module": "commonjs",
+    "module": "nodenext",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "target": "es2022",
+    "moduleResolution": "nodenext",
+    "lib": ["ES2022"],
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
@@ -19,5 +22,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
-  }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }

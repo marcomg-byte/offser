@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { env } from '../config/env';
+import { env } from '../config/env.js';
 
 const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, MAIL_FROM } = env;
 
