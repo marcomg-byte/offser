@@ -1,9 +1,9 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { mailRequestSchema } from '../schemas/mail.schema.js';
 import { ZodError } from 'zod';
 import { sendMail } from '../services/mail.service.js';
 
-const sendMailHandler = async (req: Request, res: Response) => {
+const sendMailHandler = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const data = mailRequestSchema.parse(req.body);
         const { to, subject, text, html } = data;
@@ -22,34 +22,16 @@ const sendMailHandler = async (req: Request, res: Response) => {
         console.log(`✅ ${responseTitle}:`);
         console.dir(mailResponse, { depth: 5, colors: true });
         return res.status(200).json({ title: responseTitle, data, mailResponse });
-    } catch (err: Error | unknown) {
+    } catch (err: unknown) {
+        let errorTitle = '';
         if (err instanceof ZodError) {
-            const error = err as ZodError;
-            const errorTitle = 'Request Validation Errors';
-            const errorInfo = {
-                cause: error?.cause,
-                issues: error.issues,
-                message: error.message,
-                name: error.name,
-                stack: error?.stack,
-                type: error.type
-            };
-            console.error(`❌ ${errorTitle}:`);
-            console.dir(errorInfo, { depth: 5, colors: true });
-            return res.status(400).json({ title: errorTitle, ...errorInfo });
+            errorTitle = 'Request Validation Failed';
+        } else if (err instanceof Error) {
+            errorTitle = 'Email Sending Failed';
+        } else {
+            errorTitle = 'Unknown Error Occurred While Sending Email';
         }
-
-        const error = err as Error;
-        const errorTitle = 'Error Sending Email';
-        const errorInfo = {
-            cause: error?.cause,
-            message: error.message,
-            name: error.name,
-            stack: error?.stack
-        };
-        console.error(`❌ ${errorTitle}:`);
-        console.dir(errorInfo, { depth: 5, colors: true });
-        return res.status(500).json({ title: errorTitle, ...errorInfo });
+        return next({ error: err, errorTitle });
     }
 };
 

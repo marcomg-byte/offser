@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { env } from '../config/env.js';
+import { logError } from '../utils/index.js';
 
 const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, MAIL_FROM } = env;
 
@@ -15,9 +16,8 @@ function createTransporter() {
                 pass: SMTP_PASS
             }
         });
-    } catch (err: Error | unknown) {
-        const error = err as Error;
-        console.error('❌ Failed to create mail transporter:', error.message);
+    } catch (error: unknown) {
+        logError(error, 'Failed To Create Mail Transporter');
         return null;
     }
 };
@@ -34,9 +34,8 @@ type SendMailOptions = {
 async function verifyConnection() {
     try {
         return transporter.verify();
-    } catch (err: Error | unknown) {
-        const error = err as Error;
-        console.error('❌ Connection to mail server failed:', error.message);
+    } catch (error: unknown) {
+        logError(error, 'Mail Transporter Connection Verification Failed');
         return false;
     }
 };
