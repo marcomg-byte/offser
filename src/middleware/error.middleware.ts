@@ -2,6 +2,40 @@ import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
 import { capitalizeString } from '../utils/index.js';
 
+/**
+ * Express error handling middleware for centralized error processing.
+ * 
+ * Catches and handles different error types with appropriate HTTP status codes
+ * and response formatting. Logs detailed error information and sends JSON responses
+ * to the client.
+ * 
+ * Handles three error scenarios:
+ * - Zod validation errors → 400 Bad Request with validation details
+ * - Standard Error instances → 500 Internal Server Error with error details
+ * - Unknown errors → 500 Internal Server Error with fallback message
+ * 
+ * @param {Object} value - Error handler configuration object.
+ * @param {Error|ZodError} value.error - The error object to be handled.
+ * @param {string} [value.title] - Custom error title for non-Zod errors.
+ *        Defaults to 'Request Validation Errors' for ZodError and
+ *        'Internal Server Error' for other Error types.
+ * @param {Request} _req - Express request object (unused).
+ * @param {Response} res - Express response object for sending error response.
+ * @param {NextFunction} _next - Express next function (unused).
+ * 
+ * @returns {Response} Sends a JSON response with error details and appropriate status code.
+ *         Does not call next() - terminates the error handling chain.
+ * 
+ * @example
+ * // In Express app setup
+ * app.use(errorHandler);
+ * 
+ * // Triggered when Zod validation fails
+ * // → Response: 400 with validation issues
+ * 
+ * // Triggered by thrown Error
+ * // → Response: 500 with error details
+ */
 function errorHandler(
     value: {
         error: Error | ZodError;

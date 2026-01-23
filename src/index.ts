@@ -1,11 +1,12 @@
 import 'dotenv/config';
 import express from 'express';
-import { mailRouter } from './routes/mail.routes.js';
-import { verifyConnection } from './services/mail.service.js';
-import { errorHandler } from './middleware/error.middleware.js';
+import { mailRouter } from './routes/index.js';
+import { verifyConnection } from './services/index.js';
+import { errorHandler } from './middleware/index.js';
+import { env } from './config/env.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const { PORT } = env;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
