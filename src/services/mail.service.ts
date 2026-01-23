@@ -102,7 +102,7 @@ async function verifyConnection() {
  * });
  */
 async function sendMail(options: SendMailOptions): Promise<unknown> {
-       const { to, subject, text, html } = options;
+  const { to, subject, text, html } = options;
 
   return transporter.sendMail({
     from: MAIL_FROM,
