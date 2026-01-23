@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { mailRequestSchema } from '../schemas/mail.schema.js';
+import { mailRequestSchema } from '../schemas/index.js';
 import { ZodError } from 'zod';
-import { sendMail } from '../services/mail.service.js';
+import { sendMail } from '../services/index.js';
 
 const sendMailHandler = async (req: Request, res: Response, next: NextFunction) => {
     try {
