@@ -16,18 +16,20 @@ app.use('/mail', mailRouter);
 app.use(errorHandler);
 
 const startMailService = async () => {
-    const connection = await verifyConnection();
+  const connection = await verifyConnection();
 
-    if (connection) {
-        return Promise.resolve('📧 Mail service is ready to send emails!');
-    } else {
-        throw new Error('❌ Failed to start mail service. Please check the configuration.');
-    }
-}
+  if (connection) {
+    return Promise.resolve('📧 Mail service is ready to send emails!');
+  } else {
+    throw new Error(
+      '❌ Failed to start mail service. Please check the configuration.',
+    );
+  }
+};
 
 app.listen(PORT, () => {
-    console.log(`🚀 Server is running on port ${PORT}`);
-    startMailService()
+  console.log(`🚀 Server is running on port ${PORT}`);
+  startMailService()
     .then((message) => console.log(message))
     .catch((error) => console.error(error));
 });
