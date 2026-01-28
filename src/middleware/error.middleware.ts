@@ -1,87 +1,75 @@
 import { Request, Response, NextFunction } from 'express';
-import { ZodError } from 'zod';
-import { capitalizeString } from '../utils/index.js';
+import { ZodError, prettifyError } from 'zod';
+import { logError, extractErrorInfo } from '../utils/index.js';
+import {
+  CustomZodError,
+  MailError,
+  TemplateCompileError,
+} from '../errors/index.js';
 
 /**
- * Express error handling middleware for centralized error processing.
+ * Express error-handling middleware for centralized error responses in the API.
  *
- * Catches and handles different error types with appropriate HTTP status codes
- * and response formatting. Logs detailed error information and sends JSON responses
- * to the client.
+ * This middleware inspects the type of the error thrown during request processing and
+ * determines the appropriate HTTP status code and response title. It supports:
  *
- * Handles three error scenarios:
- * - Zod validation errors → 400 Bad Request with validation details
- * - Standard Error instances → 500 Internal Server Error with error details
- * - Unknown errors → 500 Internal Server Error with fallback message
+ * - Zod validation errors (400 Bad Request, prettified output)
+ * - Mail service errors (500 Internal Server Error)
+ * - Template compilation errors (500 Internal Server Error)
+ * - Generic errors (500 Internal Server Error)
+ * - Unknown error types (500 Internal Server Error)
  *
- * @param {Object} value - Error handler configuration object.
- * @param {Error|ZodError} value.error - The error object to be handled.
- * @param {string} [value.title] - Custom error title for non-Zod errors.
- *        Defaults to 'Request Validation Errors' for ZodError and
- *        'Internal Server Error' for other Error types.
- * @param {Request} _req - Express request object (unused).
- * @param {Response} res - Express response object for sending error response.
- * @param {NextFunction} _next - Express next function (unused).
+ * All non-validation errors are logged for diagnostics. The response always includes a
+ * descriptive title and additional error information extracted from the error object.
  *
- * @returns {Response} Sends a JSON response with error details and appropriate status code.
- *         Does not call next() - terminates the error handling chain.
+ * @param {unknown} error - The error object thrown in the request pipeline. Can be any type, but typically
+ *   a ZodError, MailError, TemplateCompileError, or generic Error.
+ * @param {Request} _req - Express request object (unused in this middleware).
+ * @param {Response} res - Express response object used to send the error response.
+ * @param {NextFunction} _next - Express next function (unused in this middleware).
  *
- * @example
- * // In Express app setup
- * app.use(errorHandler);
+ * @returns {Response} Sends a JSON error response with a descriptive title and extracted error info.
  *
- * // Triggered when Zod validation fails
- * // → Response: 400 with validation issues
- *
- * // Triggered by thrown Error
- * // → Response: 500 with error details
+ * @throws This middleware does not throw. All errors are handled and a response is always sent.
  */
 function errorHandler(
-  value: {
-    error: Error | ZodError;
-    title?: string;
-  },
+  error: unknown,
   _req: Request,
   res: Response,
   _next: NextFunction,
 ) {
-  const { error, title: errorTitle } = value;
+  const errorInfo = extractErrorInfo(error);
+  let statusCode = 500;
+  let title;
 
-  if (error instanceof ZodError) {
-    const title = 'Request Validation Errors';
-    const errorInfo = {
-      title,
-      cause: error?.cause,
-      issues: error.issues,
-      message: error.message,
-      name: error.name,
-      stack: error?.stack,
-      type: error.type,
-    };
-    console.error(`❌ ${title}:`);
-    console.dir(errorInfo, { depth: 5, colors: true });
-    return res.status(400).json({ title, ...errorInfo });
+  switch (error) {
+    case error instanceof ZodError:
+      title = 'Request Validation Errors';
+      statusCode = 400;
+      prettifyError(CustomZodError);
+      break;
+    case error instanceof MailError:
+      title = 'Mail Service Error';
+      break;
+    case error instanceof TemplateCompileError:
+      title = 'Template Compilation Error';
+      break;
+    case error instanceof Error:
+      title = 'Internal Server Error';
+      break;
+    default:
+      title = 'Unknown Error Occurred';
+      break;
   }
 
-  if (error instanceof Error) {
-    const title = capitalizeString(errorTitle || 'Internal Server Error');
-    const errorInfo = {
-      cause: error?.cause,
-      message: error.message,
-      name: error.name,
-      stack: error?.stack,
-    };
-    console.error(`❌ ${title}:`);
-    console.dir(errorInfo, { depth: 5, colors: true });
-    return res.status(500).json({ title, ...errorInfo });
+  if (!(error instanceof ZodError)) {
+    logError(error, title);
   }
 
-  const title = errorTitle || 'Unknown Error';
-  console.error(`❌ ${title}:`);
-  console.error(error);
-  return res
-    .status(500)
-    .json({ title, message: 'An unknown error occurred.', error });
+  return res.status(statusCode).json({
+    title,
+    ...errorInfo,
+  });
 }
 
 export { errorHandler };
