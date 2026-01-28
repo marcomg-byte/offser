@@ -1,0 +1,32 @@
+<html>
+	<head>
+		<style>
+			body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
+			.container { background: #fff; max-width: 600px; margin: 30px auto; border-radius: 8px; box-shadow: 0 2px 8px #e0e0e0; padding: 32px; }
+			.header { text-align: center; margin-bottom: 24px; }
+			.header h1 { color: #1976d2; }
+			.offer-list { list-style: none; padding: 0; }
+			.offer-item { background: #f1f8ff; border-radius: 6px; margin-bottom: 16px; padding: 16px; border-left: 4px solid #1976d2; }
+			.offer-title { font-size: 18px; font-weight: bold; color: #1976d2; }
+			.offer-desc { color: #444; font-size: 15px; margin: 6px 0 0 0; }
+			.cta { display: block; width: 200px; margin: 32px auto 0 auto; background: #1976d2; color: #fff; text-align: center; padding: 14px 0; border-radius: 6px; text-decoration: none; font-size: 16px; }
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="header">
+				<h1>Special Offers for Your Mail Account!</h1>
+				<p>Hi {{customerName}}, enjoy these exclusive benefits and upgrades.</p>
+			</div>
+			<ul class="offer-list">
+				{{#each offers}}
+				<li class="offer-item">
+					<div class="offer-title">{{title}}</div>
+					<div class="offer-desc">{{description}}</div>
+				</li>
+				{{/each}}
+			</ul>
+			<a class="cta" href="{{ctaUrl}}">Claim Your Offer</a>
+		</div>
+	</body>
+</html>

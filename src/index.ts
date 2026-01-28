@@ -31,5 +31,8 @@ app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
   startMailService()
     .then((message) => console.log(message))
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
 });

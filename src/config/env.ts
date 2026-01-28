@@ -68,4 +68,8 @@ export const env = {
   SMTP_PASS: required('SMTP_PASS'),
   /** @type {string} Default sender email address for outgoing emails. Required. */
   MAIL_FROM: required('MAIL_FROM'),
+  /** @type {number} Rate limit for mail service requests. Required. */
+  MAIL_SERVICE_RATE_LIMIT: Number(required('MAIL_SERVICE_RATE_LIMIT')),
+  /** @type {number} Rate limit window in minutes for mail service requests. Required. */
+  MAIL_SERVICE_RATE_WINDOW: Number(required('MAIL_SERVICE_RATE_WINDOW')),
 };
