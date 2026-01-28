@@ -3,13 +3,7 @@ import { rateLimit } from 'express-rate-limit';
 import { sendMailHandler } from '../controllers/index.js';
 import { env } from '../config/env.js';
 
-/**
- * Express router for handling mail-related endpoints.
- *
- * Defines routes for sending emails and applies middleware such as rate limiting.
- */
 const router = Router();
-
 const { MAIL_SERVICE_RATE_LIMIT, MAIL_SERVICE_RATE_WINDOW } = env;
 
 const emailLimiter = rateLimit({
