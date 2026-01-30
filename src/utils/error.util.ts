@@ -1,174 +1,150 @@
-import { TemplateCompileError, MailError } from '../errors/index.js';
-import { z as zod } from 'zod';
-import { Transporter } from 'nodemailer';
+import {
+  TemplateCompileError,
+  TemplatePreloadError,
+  MailDeliveryError,
+  ConnectionVerificationError,
+  TransporterCreationError,
+} from '../errors/index.js';
+import type {
+  ErrorInfo,
+  TemplateCompileErrorInfo,
+  TemplatePreloadErrorInfo,
+  MailDeliveryErrorInfo,
+  ConnectionVerificationErrorInfo,
+  TransporterCreationErrorInfo,
+  ZodErrorInfo,
+} from '../errors/types/index.js';
+import { prettifyError, ZodError } from 'zod';
 
 /**
- * Standardized structure for parsed error objects.
+ * Union type representing all possible normalized error info structures returned by extractErrorInfo.
  *
- * Represents the essential properties extracted from any error instance
- * for consistent error handling and logging throughout the application.
- *
- * @property cause - The underlying cause of the error, if available.
- * @property message - The error message.
- * @property name - The error class or type name.
- * @property stack - The stack trace, if available.
+ * This type covers all supported error info interfaces for template, mail, and validation errors,
+ * ensuring type safety and consistency for error handling and API responses throughout the application.
  */
-interface ParsedError {
-  /** The underlying cause of the error, if available. */
-  cause?: unknown;
-  /** The error message. */
-  message: string;
-  /** The error class or type name. */
-  name: string;
-  /** The stack trace, if available. */
-  stack?: string;
-}
+type ExtractedInfo =
+  | TemplateCompileErrorInfo
+  | TemplatePreloadErrorInfo
+  | MailDeliveryErrorInfo
+  | ConnectionVerificationErrorInfo
+  | TransporterCreationErrorInfo
+  | ZodErrorInfo;
 
 /**
- * Parsed error structure for Zod validation errors.
+ * Extracts the base error information from a standard Error object.
  *
- * Extends ParsedError with Zod-specific properties for detailed validation diagnostics.
+ * Returns a normalized ErrorInfo object containing the cause, message, name, and stack trace.
+ * Used as a foundation for building more specific error info structures for logging and API responses.
  *
- * @property issues - Array of Zod validation issues.
- * @property type - The Zod error type (e.g., 'object', 'string', etc.).
+ * @param error - The Error instance to extract info from.
+ * @returns {ErrorInfo} The normalized error info object.
  */
-interface ZodParsedError extends ParsedError {
-  /** Array of Zod validation issues. */
-  issues: zod.core.$ZodIssue[];
-  /** The Zod error type (e.g., 'object', 'string', etc.). */
-  type: unknown;
-}
-
-/**
- * Parsed error structure for template compilation errors.
- *
- * Extends ParsedError with properties specific to template compilation failures.
- *
- * @property rootError - The original error thrown during template compilation (optional).
- * @property templateName - The name of the template that failed to compile.
- * @property templateData - The data provided to the template during compilation.
- */
-interface TemplateCompileParsedError extends ParsedError {
-  /** The original error thrown during template compilation (optional). */
-  rootError?: unknown;
-  /** The name of the template that failed to compile. */
-  templateName: string;
-  /** The data provided to the template during compilation. */
-  templateData: Record<string, unknown>;
-}
-
-/**
- * Parsed error structure for mail service errors.
- *
- * Extends ParsedError with properties specific to mail transport and SMTP failures.
- *
- * @property rootError - The original error that caused the mail failure (optional).
- * @property secure - Whether the SMTP connection is secure (TLS/SSL).
- * @property smtpHost - SMTP host address.
- * @property smtpPort - SMTP port number.
- * @property smtpUser - SMTP username.
- * @property transporter - The nodemailer transporter instance used (optional).
- */
-interface MailParsedError extends ParsedError {
-  /** The original error that caused the mail failure (optional). */
-  rootError?: unknown;
-  /** Whether the SMTP connection is secure (TLS/SSL). */
-  secure: boolean;
-  /** SMTP host address. */
-  smtpHost: string;
-  /** SMTP port number. */
-  smtpPort: number;
-  /** SMTP username. */
-  smtpUser: string;
-  /** The nodemailer transporter instance used (optional). */
-  transporter?: Transporter;
-}
-
-/**
- * Union type representing all possible parsed error structures handled by extractErrorInfo.
- *
- * Can be a parsed mail error, template compilation error, Zod validation error, or a generic error.
- */
-type ErrorInfo =
-  | MailParsedError
-  | ParsedError
-  | TemplateCompileParsedError
-  | ZodParsedError;
+const extractBaseInfo = (error: Error): ErrorInfo => ({
+  cause: error?.cause,
+  message: error.message,
+  name: error.name,
+  stack: error?.stack,
+});
 
 /**
  * Extracts and normalizes error information from various error types.
  *
  * Inspects the error instance and returns a standardized error info object
- * (ErrorInfo) with relevant properties for logging and API responses.
+ * (ExtractedInfo) with relevant properties for logging and API responses.
  *
  * Handles:
- * - Zod validation errors (ZodParsedError)
- * - Template compilation errors (TemplateCompileParsedError)
- * - Mail service errors (MailParsedError)
- * - Generic errors (ParsedError)
- * - Unknown error types (returns a generic ParsedError)
+ * - Zod validation errors (returns prettified error string)
+ * - Template compilation and preload errors (includes template context)
+ * - Mail service errors (includes mail context)
+ * - Generic errors (returns base error info)
+ * - Unknown error types (returns a generic error info object)
  *
  * @param error - The error object to extract info from (can be any type).
- * @returns {ErrorInfo} A normalized error info object with relevant properties for the error type.
+ * @returns {ExtractedInfo} A normalized error info object with relevant properties for the error type.
  *
  * @example
  * const info = extractErrorInfo(new ZodError(...));
- * // info: { name, message, issues, type, ... }
+ * // info: { error: 'prettified validation error' }
+ *
+ * const info = extractErrorInfo(new TemplateCompileError(...));
+ * // info: { message, name, rootError, templateData, templateName, ... }
+ *
+ * const info = extractErrorInfo(new Error('Something went wrong'));
+ * // info: { message: 'Something went wrong', name: 'Error', ... }
  */
-const extractErrorInfo = (error: unknown): ErrorInfo => {
-  if (error instanceof zod.ZodError) {
+const extractErrorInfo = (error: unknown): ExtractedInfo => {
+  let baseInfo: ErrorInfo;
+
+  if (error instanceof ZodError) {
     return {
-      cause: error?.cause,
-      issues: error.issues,
-      message: error.message,
-      name: error.name,
-      stack: error?.stack,
-      type: error.type,
+      error: prettifyError(error),
     };
+  }
+
+  if (error instanceof Error) {
+    baseInfo = extractBaseInfo(error);
   }
 
   if (error instanceof TemplateCompileError) {
     return {
-      cause: error?.cause,
-      message: error.message,
-      name: error.name,
-      stack: error?.stack,
+      ...baseInfo,
       rootError: error?.rootError,
       templateData: error.templateData,
       templateName: error.templateName,
     };
   }
 
-  if (error instanceof MailError) {
+  if (error instanceof TemplatePreloadError) {
     return {
-      cause: error?.cause,
-      message: error.message,
-      name: error.name,
+      ...baseInfo,
       rootError: error?.rootError,
-      secure: error.secure,
+    };
+  }
+
+  if (error instanceof MailDeliveryError) {
+    return {
+      ...baseInfo,
+      rootError: error?.rootError,
+      to: error.to,
+      subject: error.subject,
+      text: error.text,
+      html: error.html,
+      transporter: error.transporter,
+    };
+  }
+
+  if (error instanceof ConnectionVerificationError) {
+    return {
+      ...baseInfo,
+      rootError: error?.rootError,
+      transporter: error.transporter,
+    };
+  }
+
+  if (error instanceof TransporterCreationError) {
+    return {
+      ...baseInfo,
+      rootError: error?.rootError,
       smtpHost: error.smtpHost,
       smtpPort: error.smtpPort,
       smtpUser: error.smtpUser,
-      stack: error?.stack,
-      transporter: error?.transporter,
+      secure: error.secure,
     };
   }
 
   if (error instanceof Error) {
-    return {
-      cause: error?.cause,
-      message: error.message,
-      name: error.name,
-      stack: error?.stack,
-    };
+    return baseInfo;
   }
 
-  return {
+  baseInfo = {
     cause: undefined,
     message: 'An Unknown Error Occurred',
     name: 'UnknownError',
     stack: undefined,
   };
+
+  return baseInfo;
 };
 
 export { extractErrorInfo };
+export type { ExtractedInfo as ErrorInfo };

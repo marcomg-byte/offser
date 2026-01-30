@@ -1,4 +1,17 @@
-import { TemplateCompileError } from './template.error.js';
-import { MailError } from './mail.error.js';
+import {
+  TemplateCompileError,
+  TemplatePreloadError,
+} from './template.error.js';
+import {
+  MailDeliveryError,
+  ConnectionVerificationError,
+  TransporterCreationError,
+} from './mail.error.js';
 
-export { MailError, TemplateCompileError };
+export {
+  MailDeliveryError,
+  ConnectionVerificationError,
+  TransporterCreationError,
+  TemplateCompileError,
+  TemplatePreloadError,
+};

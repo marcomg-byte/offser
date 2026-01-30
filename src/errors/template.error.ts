@@ -51,4 +51,14 @@ class TemplateCompileError extends Error {
   }
 }
 
-export { TemplateCompileError };
+class TemplatePreloadError extends Error {
+  public rootError?: unknown;
+
+  constructor(rootError?: unknown) {
+    super('Failed to preload templates');
+    this.name = 'TemplatePreloadError';
+    this.rootError = rootError;
+  }
+}
+
+export { TemplateCompileError, TemplatePreloadError };

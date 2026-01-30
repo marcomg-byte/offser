@@ -72,4 +72,6 @@ export const env = {
   MAIL_SERVICE_RATE_LIMIT: Number(required('MAIL_SERVICE_RATE_LIMIT')),
   /** @type {number} Rate limit window in minutes for mail service requests. Required. */
   MAIL_SERVICE_RATE_WINDOW: Number(required('MAIL_SERVICE_RATE_WINDOW')),
+  /** @type {string} Node environment mode (e.g., 'development', 'production', 'test'). Required. */
+  NODE_ENV: required('NODE_ENV').toUpperCase(),
 };

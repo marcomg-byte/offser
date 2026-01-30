@@ -42,7 +42,7 @@ const sendMailHandler = async (
     let finalHtml = html;
 
     if (templateName) {
-      finalHtml = await compileTemplate(templateName, templateData || {});
+      finalHtml = compileTemplate(templateName, templateData || {});
     }
 
     const mailResponse = await sendMail({
