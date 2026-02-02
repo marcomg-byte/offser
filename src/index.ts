@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
-import { mailRouter } from './routes/index.js';
+import { mailRouter, templateRouter } from './routes/index.js';
 import {
   verifyConnection as verifyMailConnection,
   preloadTemplates,
@@ -17,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.text({ type: 'text/*' }));
 
 app.use('/mail', mailRouter);
+app.use('/render', templateRouter);
 app.use(errorHandler);
 
 const preloadTemplateService = (): void => {

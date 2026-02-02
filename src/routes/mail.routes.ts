@@ -8,7 +8,7 @@ const { MAIL_SERVICE_RATE_LIMIT, MAIL_SERVICE_RATE_WINDOW } = env;
 
 const emailLimiter = rateLimit({
   windowMs: MAIL_SERVICE_RATE_WINDOW * 60 * 1000,
-  max: MAIL_SERVICE_RATE_LIMIT,
+  limit: MAIL_SERVICE_RATE_LIMIT,
   message: 'Too many email requests from this IP, please try again later',
   standardHeaders: true,
   legacyHeaders: false,
