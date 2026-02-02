@@ -1,15 +1,17 @@
 # Offser
 
-A TypeScript-based Express.js server for sending emails via SMTP. Features validation, error handling, and a modular architecture.
+A TypeScript-based Express.js server for sending emails via SMTP, with template rendering, robust validation, error handling, and modular architecture.
 
 ## Features
 
 - Express.js API with modular routing
 - TypeScript for type safety
-- Zod schema validation for email requests
+- Zod schema validation for all request payloads
 - Nodemailer integration for SMTP email delivery
+- Handlebars template rendering with production caching
 - Centralized error handling middleware
-- Environment variable configuration
+- Environment variable configuration with validation
+- Rate limiting for mail and render endpoints
 - Utility functions for string formatting and error logging
 - Comprehensive error logging and debugging
 
@@ -20,31 +22,42 @@ A TypeScript-based Express.js server for sending emails via SMTP. Features valid
 ├── src/
 │   ├── index.ts                 # Application entry point
 │   ├── config/
-│   │   └── env.ts               # Environment variables configuration
+│   │   └── env.ts               # Environment variables configuration & validation
 │   ├── controllers/
-│   │   ├── index.ts             # Controller exports
-│   │   └── mail.controller.ts   # Email request handler
+│   │   ├── index.ts
+│   │   ├── mail.controller.ts   # Email request handler
+│   │   └── template.controller.ts # Template rendering handler
+│   ├── errors/
+│   │   ├── index.ts
+│   │   ├── mail.error.ts
+│   │   ├── template.error.ts
+│   │   └── types/               # Error info types
 │   ├── middleware/
-│   │   ├── index.ts             # Middleware exports
+│   │   ├── index.ts
 │   │   └── error.middleware.ts  # Centralized error handling
 │   ├── routes/
-│   │   ├── index.ts             # Route exports
-│   │   └── mail.routes.ts       # Email API routes
+│   │   ├── index.ts
+│   │   ├── mail.routes.ts       # Email API routes
+│   │   └── template.routes.ts   # Template rendering API routes
 │   ├── schemas/
-│   │   ├── index.ts             # Schema exports
-│   │   └── mail.schema.ts       # Email validation schema (Zod)
+│   │   ├── index.ts
+│   │   ├── mail.schema.ts       # Email validation schema (Zod)
+│   │   └── template.schema.ts   # Template data validation schemas (Zod)
 │   ├── services/
-│   │   ├── index.ts             # Service exports
-│   │   └── mail.service.ts      # Email sending service (Nodemailer)
+│   │   ├── index.ts
+│   │   ├── mail.service.ts      # Email sending service (Nodemailer)
+│   │   └── template.service.ts  # Template rendering & caching
+│   ├── templates/               # Handlebars templates
 │   └── utils/
-│       ├── index.ts             # Utility exports
-│       ├── error.util.ts        # Error logging utilities
-│       └── format.util.ts       # String formatting utilities
+│       ├── index.ts
+│       ├── error.util.ts        # Error extraction utilities
+│       ├── format.util.ts       # String formatting utilities
+│       └── logger.util.ts       # Logging utilities
 ├── .env                         # Environment variables (local)
 ├── .gitignore                   # Git ignore rules
 ├── .prettierrc                  # Prettier code formatting config
 ├── eslint.config.js             # ESLint configuration
-├── package.json                 # Project dependencies
+├── package.json                 # Project dependencies & scripts
 ├── tsconfig.json                # TypeScript configuration
 └── README.md                    # Project documentation
 ```
@@ -81,16 +94,11 @@ A TypeScript-based Express.js server for sending emails via SMTP. Features valid
     SMTP_USER=your-email@gmail.com
     SMTP_PASS=your-app-password
     MAIL_FROM=your-email@gmail.com
+    MAIL_SERVICE_RATE_LIMIT=10
+    MAIL_SERVICE_RATE_WINDOW=15
+    RENDER_SERVICE_RATE_LIMIT=20
+    RENDER_SERVICE_RATE_WINDOW=10
     ```
-
-    **Environment Variables:**
-    - `NODE_ENV` - Application environment (development/production)
-    - `PORT` - Server port (default: 3000)
-    - `SMTP_HOST` - SMTP server hostname
-    - `SMTP_PORT` - SMTP server port (587 for TLS, 465 for SSL)
-    - `SMTP_USER` - SMTP authentication username
-    - `SMTP_PASS` - SMTP authentication password
-    - `MAIL_FROM` - Default sender email address
 
 4. **Build the project**
     ```sh
@@ -124,21 +132,20 @@ npm run dev
 
 ### Modular Structure
 
-The project follows a modular architecture pattern:
-
 - **Controllers** - Handle HTTP requests and responses
-- **Services** - Contain business logic (email sending)
-- **Routes** - Define API endpoints
-- **Schemas** - Define data validation rules (Zod)
-- **Middleware** - Handle cross-cutting concerns (error handling)
-- **Utils** - Provide reusable utility functions
-- **Config** - Manage application configuration
+- **Services** - Business logic (email sending, template rendering)
+- **Routes** - Define API endpoints and rate limiting
+- **Schemas** - Data validation rules (Zod)
+- **Middleware** - Cross-cutting concerns (error handling)
+- **Utils** - Reusable utility functions
+- **Config** - Application configuration and environment validation
+- **Templates** - Handlebars templates for dynamic emails
 
 ### Error Handling
 
 Centralized error handling middleware catches and processes:
 - **Zod Validation Errors** → 400 Bad Request with validation details
-- **Standard Errors** → 500 Internal Server Error with error details
+- **Mail/Template Errors** → 500 Internal Server Error with context
 - **Unknown Errors** → 500 Internal Server Error with fallback message
 
 All errors are logged with detailed information including stack traces and error context.
@@ -156,128 +163,93 @@ All errors are logged with detailed information including stack traces and error
   "to": "recipient@example.com",
   "subject": "Email Subject",
   "text": "Plain text content",
-  "html": "<p>HTML content</p>"
+  "html": "<p>HTML content</p>",
+  "templateName": "offers",
+  "templateData": { "customerName": "John", ... }
 }
 ```
 
 **Request Fields:**
 - `to` (required, string) - Recipient email address (must be valid email format)
-- `subject` (required, string) - Email subject line (alphanumeric, spaces, and special characters)
+- `subject` (required, string) - Email subject line
 - `text` (optional, string) - Plain text email body
 - `html` (optional, string) - HTML email body
+- `templateName` (optional, string) - Name of Handlebars template to use
+- `templateData` (optional, object) - Data for template variables
 
 **Success Response (200):**
 ```json
 {
   "title": "Email Sent Successfully!",
-  "data": {
-    "to": "recipient@example.com",
-    "subject": "Email Subject",
-    "text": "Plain text content",
-    "html": "<p>HTML content</p>"
-  },
-  "mailResponse": {
-    "messageId": "<message-id@example.com>"
-  }
+  "data": { ... },
+  "mailResponse": { "messageId": "<message-id@example.com>", ... }
 }
 ```
 
 **Validation Error Response (400):**
 ```json
 {
-  "title": "Request Validation Errors",
-  "cause": null,
-  "issues": [
-    {
-      "code": "invalid_string",
-      "expected": "email",
-      "received": "string",
-      "path": ["to"],
-      "message": "Invalid email address"
-    }
-  ],
-  "message": "Invalid input",
-  "name": "ZodError",
-  "stack": "...",
-  "type": "error"
+  "title": "Request Validation Error",
+  "error": "Prettified validation error message"
 }
 ```
 
 **Server Error Response (500):**
 ```json
 {
-  "title": "Email Sending Failed",
-  "cause": null,
-  "message": "Error message describing the failure",
-  "name": "Error",
-  "stack": "..."
+  "title": "Mail Service Error",
+  "name": "MailDeliveryError",
+  "message": "...",
+  ...
 }
 ```
 
-### Example Requests
+### Render Template
 
-**cURL:**
-```bash
-curl -X POST http://localhost:8080/mail/send \
-  -H "Content-Type: application/json" \
-  -d '{
-    "to": "user@example.com",
-    "subject": "Hello World",
-    "html": "<p>This is a test email</p>"
-  }'
+- **Endpoint**: `GET /render/:templateName`
+- **Description**: Render a Handlebars template with provided data (in request body)
+
+**Request Example:**
+```http
+GET /render/offers
+Content-Type: application/json
+
+{
+  "customerName": "John",
+  "offers": [
+    { "title": "Discount", "description": "10% off" }
+  ],
+  "ctaUrl": "https://example.com/offer"
+}
 ```
 
-**JavaScript (fetch):**
-```javascript
-const response = await fetch('http://localhost:8080/mail/send', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    to: 'user@example.com',
-    subject: 'Hello World',
-    html: '<p>This is a test email</p>'
-  })
-});
+**Success Response (200):**
+- Returns rendered HTML string.
 
-const data = await response.json();
-console.log(data);
+**Validation Error Response (400):**
+```json
+{
+  "title": "Request Validation Error",
+  "error": "Prettified validation error message"
+}
 ```
 
 ## Key Utilities
 
-### String Formatting
-
-The project includes utility functions for string formatting:
-
 - [`capitalizeWord(word)`](src/utils/format.util.ts) - Capitalize first letter of a word
 - [`capitalizeString(value)`](src/utils/format.util.ts) - Capitalize first letter of each word
+- [`logError(error, title)`](src/utils/logger.util.ts) - Structured error logging
+- [`extractErrorInfo(error)`](src/utils/error.util.ts) - Normalized error extraction
 
-### Error Logging
-
-- [`logError(error, title)`](src/utils/error.util.ts) - Structured error logging with emoji indicators
-
-### Environment Configuration
+## Environment Configuration
 
 - [`required(name)`](src/config/env.ts) - Retrieve required environment variables with validation
 - [`env`](src/config/env.ts) - Application configuration object with all environment settings
 
 ## Code Quality
 
-### Linting & Formatting
-
-The project uses:
-- **ESLint** - Code linting with TypeScript support
-- **Prettier** - Code formatting
-
-Configuration files:
-- [`.prettierrc`](.prettierrc) - Prettier formatting rules
-- [`eslint.config.js`](eslint.config.js) - ESLint rules and plugins
-
-**Prettier Settings:**
-- Semi-colons: enabled
-- Single quotes: enabled
-- Tab width: 2 spaces
-- Trailing commas: all
+- **ESLint** - Code linting with TypeScript support ([`eslint.config.js`](eslint.config.js))
+- **Prettier** - Code formatting ([`.prettierrc`](.prettierrc))
 
 ## Development Workflow
 
@@ -290,23 +262,14 @@ Configuration files:
 7. Push to the branch: `git push origin feature/my-feature`
 8. Open a pull request
 
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/my-feature`)
-3. Commit your changes (`git commit -am 'Add new feature'`)
-4. Push to the branch (`git push origin feature/my-feature`)
-5. Open a pull request
-
 ## Troubleshooting
 
 ### SMTP Connection Issues
 
-If you encounter SMTP connection errors:
-1. Verify your SMTP credentials in `.env`
-2. Check firewall settings (port 587 or 465)
-3. Enable "Less secure app access" if using Gmail
-4. Use app-specific passwords instead of account password
+- Verify your SMTP credentials in `.env`
+- Check firewall settings (port 587 or 465)
+- Enable "Less secure app access" if using Gmail
+- Use app-specific passwords instead of account password
 
 ### TypeScript Compilation Issues
 
@@ -316,9 +279,8 @@ If you encounter SMTP connection errors:
 
 ### Port Already in Use
 
-If the default port is already in use:
-1. Change `PORT` in `.env` to an available port
-2. Or kill the process using the port: `lsof -i :8080`
+- Change `PORT` in `.env` to an available port
+- Or kill the process using the port: `lsof -i :8080`
 
 ---
 
