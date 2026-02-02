@@ -1,19 +1,29 @@
 <html>
 	<head>
 		<style>
-			body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
-			.container { background: #fff; max-width: 600px; margin: 30px auto; border-radius: 8px; box-shadow: 0 2px 8px #e0e0e0; padding: 32px; }
+			:root {
+				--colors-text-inverse: #ffffff;
+				--colors-text-primary: #000000;
+				--colors-text-subtle: #bfc9d1;
+				--colors-text-highlight: #dc0000;
+				--colors-bg-primary: #f7f7f7;
+				--colors-bg-subtle: #f0f0f0;
+				--colors-bg-accent: #1976d2;
+				--colors-shadow-subtle: #e0e0e0;
+			}
+			body { font-family: Arial, sans-serif; background: var(--colors-bg-primary); margin: 0; padding: 0; }
+			.container { background: var(--colors-bg-subtle); max-width: 600px; margin: 30px auto; border-radius: 8px; box-shadow: 0 2px 8px var(--colors-shadow-subtle); padding: 32px; }
 			.header { text-align: center; margin-bottom: 24px; }
-			.header h1 { color: #222; }
+			.header h1 { color: var(--colors-bg-accent); }
 			.offer-list { list-style: none; padding: 0; }
 			.offer-item { display: flex; align-items: center; border-bottom: 1px solid #eee; padding: 16px 0; }
 			.offer-item:last-child { border-bottom: none; }
 			.sneaker-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 24px; }
 			.sneaker-info { flex: 1; }
-			.sneaker-name { font-size: 18px; font-weight: bold; color: #333; }
-			.sneaker-desc { color: #666; font-size: 14px; margin: 4px 0 8px 0; }
-			.sneaker-price { color: #e53935; font-size: 16px; font-weight: bold; }
-			.cta { display: block; width: 200px; margin: 32px auto 0 auto; background: #222; color: #fff; text-align: center; padding: 14px 0; border-radius: 6px; text-decoration: none; font-size: 16px; }
+			.sneaker-name { font-size: 18px; font-weight: bold; color: var(--colors-text-primary); }
+			.sneaker-desc { color: var(--colors-text-subtle); font-size: 14px; margin: 4px 0 8px 0; }
+			.sneaker-price { color: var(--colors-text-highlight); font-size: 16px; font-weight: bold; }
+			.cta { display: block; width: 200px; margin: 32px auto 0 auto; background: var(--colors-bg-accent); color: var(--colors-text-inverse); text-align: center; padding: 14px 0; border-radius: 6px; text-decoration: none; font-size: 16px; }
 		</style>
 	</head>
 	<body>
