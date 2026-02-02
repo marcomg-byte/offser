@@ -15,6 +15,16 @@ export default [
         plugins: { prettier: prettierPlugin },
         rules: {
             'prettier/prettier': 'error',
+            'max-len': [
+                'error',
+                {
+                    code: 120,
+                    ignoreComments: true,
+                    ignoreStrings: true,
+                    ignoreTemplateLiterals: true,
+                    ignoreUrls: true
+                }
+            ],
         } 
     },
     {
