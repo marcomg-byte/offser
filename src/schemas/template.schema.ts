@@ -66,6 +66,8 @@ const shipmentTemplateSchema = zod.object({
       name: zod.string(),
       /** The quantity of the item. */
       quantity: zod.number().min(1),
+      /** The image URL of the item. */
+      image: zod.url(),
     }),
   ),
   /** The tracking URL for the shipment. */
