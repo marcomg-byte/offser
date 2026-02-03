@@ -4,6 +4,7 @@ import type {
   MailDeliveryErrorInfo,
   TransporterCreationErrorInfo,
 } from './mail.error.js';
+import type { CertificateNotFoundErrorInfo } from './server.error.js';
 import type {
   TemplateCompileErrorInfo,
   TemplatePreloadErrorInfo,
@@ -11,8 +12,9 @@ import type {
 import type { ZodErrorInfo } from './zod.error.js';
 
 export type {
-  ErrorInfo,
+  CertificateNotFoundErrorInfo,
   ConnectionVerificationErrorInfo,
+  ErrorInfo,
   MailDeliveryErrorInfo,
   TransporterCreationErrorInfo,
   TemplateCompileErrorInfo,

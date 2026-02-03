@@ -7,8 +7,10 @@ import {
   ConnectionVerificationError,
   TransporterCreationError,
 } from './mail.error.js';
+import { CertificateNotFoundError } from './server.error.js';
 
 export {
+  CertificateNotFoundError,
   MailDeliveryError,
   ConnectionVerificationError,
   TransporterCreationError,
