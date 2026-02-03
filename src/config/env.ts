@@ -84,4 +84,10 @@ export const env = {
    * Time window (in minutes) for the render service rate limit.
    */
   RENDER_SERVICE_RATE_WINDOW: Number(required('RENDER_SERVICE_RATE_WINDOW')),
+  /** @type {boolean} Flag to enable HTTPS. Defaults to false if HTTPS_ENABLED env var is not set. */
+  HTTPS_ENABLED: process.env.HTTPS_ENABLED === 'true',
+  /** @type {string} File path to the HTTPS key. Required if HTTPS is enabled. */
+  HTTPS_KEY_PATH: process.env.HTTPS_KEY_PATH || './key.pem',
+  /** @type {string} File path to the HTTPS certificate. Required if HTTPS is enabled. */
+  HTTPS_CERT_PATH: process.env.HTTPS_CERT_PATH || './cert.pem',
 };

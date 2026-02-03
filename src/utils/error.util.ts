@@ -1,16 +1,18 @@
 import {
+  CertificateNotFoundError,
+  ConnectionVerificationError,
+  MailDeliveryError,
   TemplateCompileError,
   TemplatePreloadError,
-  MailDeliveryError,
-  ConnectionVerificationError,
   TransporterCreationError,
 } from '../errors/index.js';
 import type {
+  CertificateNotFoundErrorInfo,
+  ConnectionVerificationErrorInfo,
   ErrorInfo,
+  MailDeliveryErrorInfo,
   TemplateCompileErrorInfo,
   TemplatePreloadErrorInfo,
-  MailDeliveryErrorInfo,
-  ConnectionVerificationErrorInfo,
   TransporterCreationErrorInfo,
   ZodErrorInfo,
 } from '../errors/types/index.js';
@@ -19,14 +21,17 @@ import { prettifyError, ZodError } from 'zod';
 /**
  * Union type representing all possible normalized error info structures returned by extractErrorInfo.
  *
- * This type covers all supported error info interfaces for template, mail, and validation errors,
- * ensuring type safety and consistency for error handling and API responses throughout the application.
+ * This type includes all supported error info interfaces for template, mail, validation, and HTTPS certificate errors.
+ * It ensures type safety and consistency for error handling and API responses throughout the application,
+ * covering every error type that can be processed by extractErrorInfo.
  */
 type ExtractedInfo =
+  | ErrorInfo
+  | CertificateNotFoundErrorInfo
+  | ConnectionVerificationErrorInfo
   | TemplateCompileErrorInfo
   | TemplatePreloadErrorInfo
   | MailDeliveryErrorInfo
-  | ConnectionVerificationErrorInfo
   | TransporterCreationErrorInfo
   | ZodErrorInfo;
 
@@ -85,19 +90,19 @@ const extractErrorInfo = (error: unknown): ExtractedInfo => {
     baseInfo = extractBaseInfo(error);
   }
 
-  if (error instanceof TemplateCompileError) {
+  if (error instanceof CertificateNotFoundError) {
     return {
       ...baseInfo,
-      rootError: error?.rootError,
-      templateData: error.templateData,
-      templateName: error.templateName,
+      certPath: error.certPath,
+      keyPath: error.keyPath,
     };
   }
 
-  if (error instanceof TemplatePreloadError) {
+  if (error instanceof ConnectionVerificationError) {
     return {
       ...baseInfo,
       rootError: error?.rootError,
+      transporter: error.transporter,
     };
   }
 
@@ -113,11 +118,19 @@ const extractErrorInfo = (error: unknown): ExtractedInfo => {
     };
   }
 
-  if (error instanceof ConnectionVerificationError) {
+  if (error instanceof TemplateCompileError) {
     return {
       ...baseInfo,
       rootError: error?.rootError,
-      transporter: error.transporter,
+      templateData: error.templateData,
+      templateName: error.templateName,
+    };
+  }
+
+  if (error instanceof TemplatePreloadError) {
+    return {
+      ...baseInfo,
+      rootError: error?.rootError,
     };
   }
 
