@@ -5,9 +5,11 @@
   "main": "index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "npx tsc && npm run build:templates",
+    "build": "npx tsc && npm run build:templates && npm run build:certs",
     "build:templates": "npx cpy src/templates/**/* dist/templates --parents",
-    "dev": "nodemon --watch src --exec tsx src/index.ts",
+    "build:certs": "npx cpy src/config/certs/**/* dist/config/certs --parents",
+    "watch:templates": "nodemon --watch src/templates --ext hbs --exec \"npm run build:templates\"",
+    "dev": "concurrently \"npm run watch:templates\" \"nodemon --watch src --ext ts --exec tsx src/index.ts\"",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "prepare": "npm run clean && npm run build",
@@ -19,6 +21,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "concurrently": "^9.2.1",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
