@@ -6,11 +6,23 @@ import {
   preloadTemplates,
 } from './services/index.js';
 import { errorHandler } from './middleware/index.js';
-import { extractErrorInfo, logError } from './utils/index.js';
+import { extractErrorInfo, logger } from './utils/index.js';
 import { CertificateNotFoundError } from './errors/index.js';
 import { env } from './config/env.js';
+import { execSync } from 'child_process';
 import https from 'https';
 import fs from 'fs';
+
+/** Sets the console code page to UTF-8 on Windows for proper encoding */
+if (process.platform === 'win32') {
+  try {
+    execSync('chcp 65001', { stdio: 'ignore' });
+  } catch (error: unknown) {
+    const errorInfo = extractErrorInfo(error);
+    console.error(' ❌ Failed to set console to UTF-8 encoding');
+    console.error(errorInfo);
+  }
+}
 
 const app = express();
 const { PORT, NODE_ENV, HTTPS_ENABLED, HTTPS_CERT_PATH, HTTPS_KEY_PATH } = env;
@@ -31,10 +43,10 @@ app.use(errorHandler);
 const preloadTemplateService = (): void => {
   try {
     const templatesLoaded = preloadTemplates();
-    console.log(`📄 Preloaded ${templatesLoaded} templates.`);
+    logger.info(`📄 Preloaded ${templatesLoaded} templates.`);
   } catch (error: unknown) {
     const errorInfo = extractErrorInfo(error);
-    logError(errorInfo, 'Failed to Preload Templates');
+    logger.error({ errorInfo }, 'Failed to Preload Templates');
     process.exit(1);
   }
 };
@@ -64,7 +76,7 @@ const createHttpsServer = (): https.Server => {
     return https.createServer({ key, cert }, app);
   } catch (error: unknown) {
     const errorInfo = extractErrorInfo(error);
-    logError(errorInfo, 'Failed to Create HTTPS Server');
+    logger.error({ errorInfo }, 'Failed to Create HTTPS Server');
     process.exit(1);
   }
 };
@@ -77,34 +89,34 @@ const createHttpsServer = (): https.Server => {
  * If mail service verification fails, logs the error and exits the process.
  */
 const onServerStart = (): void => {
-  console.log(`🚀 Server is Running on Port ${PORT}`);
+  logger.info(`🚀 Server is Running on Port ${PORT}`);
 
   if (HTTPS_ENABLED) {
-    console.log('🔐 Using HTTPS');
+    logger.info('🔐 Using HTTPS');
   } else {
-    console.log('🔓 Using HTTP');
+    logger.info('🔓 Using HTTP');
   }
 
   if (NODE_ENV === 'PRODUCTION') {
     preloadTemplateService();
-    console.log('🔒 Running in Production Mode');
+    logger.info('🔒 Running in Production Mode');
   } else {
-    console.log('🛠️  Running in Development Mode');
+    logger.info('🛠️  Running in Development Mode');
   }
 
   verifyMailConnection()
     .then((connection) => {
       if (connection) {
-        console.log('📧 Mail Service Connected Successfully');
+        logger.info('📧 Mail Service Connected Successfully');
         return;
       }
 
-      console.log('❌ Failed to Verify Mail Service Connection');
+      logger.error('❌ Failed to Verify Mail Service Connection');
       process.exit(1);
     })
     .catch((error) => {
       const errorInfo = extractErrorInfo(error);
-      logError(errorInfo, 'Failed to Start Mail Service');
+      logger.error({ errorInfo }, 'Failed to Start Mail Service');
       process.exit(1);
     });
 };

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
-import { logError, extractErrorInfo } from '../utils/index.js';
+import { logger, extractErrorInfo } from '../utils/index.js';
 import {
   MailDeliveryError,
   ConnectionVerificationError,
@@ -116,7 +116,7 @@ function errorHandler(
     title = 'Internal Server Error';
   }
 
-  logError(errorInfo, title);
+  logger.error({ errorInfo }, title);
   return res.status(statusCode).json({
     title,
     ...errorInfo,

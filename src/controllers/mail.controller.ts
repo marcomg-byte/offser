@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { mailRequestSchema } from '../schemas/index.js';
 import { compileTemplate, sendMail } from '../services/index.js';
+import { logger } from '../utils/index.js';
 
 /**
  * Express route handler for sending emails via POST request.
@@ -52,8 +53,8 @@ const sendMailHandler = async (
       html: finalHtml,
     });
 
-    console.log(`✅ ${responseTitle}:`);
-    console.dir(mailResponse, { depth: 5, colors: true });
+    logger.info(`✅ ${responseTitle}:`);
+    logger.info(mailResponse);
     return res.status(200).json({ title: responseTitle, data, mailResponse });
   } catch (error: unknown) {
     return next(error);
