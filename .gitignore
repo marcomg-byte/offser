@@ -1,8 +1,18 @@
+# Ignore node modules
 node_modules
+
+# Ignore environment variable files
 .env
+
+# Ignore build and log directories
 dist
+logs
+backup
 
 # Ignore HTTPS certificates
 **/*.pem
 **/*.key
 **/*.cert
+
+# Ignore log files
+**/*.log

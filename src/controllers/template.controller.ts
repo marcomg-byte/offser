@@ -6,6 +6,7 @@ import {
   offersTemplateSchema,
   shipmentTemplateSchema,
 } from '../schemas/index.js';
+import { logger } from '../utils/index.js';
 
 const templateHandler = (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -24,8 +25,8 @@ const templateHandler = (req: Request, res: Response, next: NextFunction) => {
     }
 
     const html = compileTemplate(templateName, bodyData);
-    console.log(`✅ Template "${templateName}" rendered successfully.`);
-    console.log(
+    logger.info(`✅ Template "${templateName}" rendered successfully.`);
+    logger.info(
       html.slice(0, 300) + (html.length > 300 ? '... [truncated]' : ''),
     );
     return res.status(200).send(html);
