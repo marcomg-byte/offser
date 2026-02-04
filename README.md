@@ -1,6 +1,6 @@
 # Offser
 
-A TypeScript-based Express.js server for sending emails via SMTP, with template rendering, robust validation, error handling, and modular architecture.
+A TypeScript-based Express.js server for sending emails via SMTP, with template rendering, robust validation, error handling, modular architecture, and advanced logging.
 
 ## Features
 
@@ -12,7 +12,11 @@ A TypeScript-based Express.js server for sending emails via SMTP, with template 
 - Centralized error handling middleware
 - Environment variable configuration with validation
 - Rate limiting for mail and render endpoints
-- Utility functions for string formatting and error logging
+- Utility functions for string formatting and error extraction
+- **Advanced logging with [Pino](https://github.com/pinojs/pino) and multistream:**
+  - Pretty terminal output
+  - Structured JSON logs per level (error, info, warn, debug)
+  - Automatic log file creation
 - Comprehensive error logging and debugging
 
 ## Project Structure
@@ -52,7 +56,7 @@ A TypeScript-based Express.js server for sending emails via SMTP, with template 
 │       ├── index.ts
 │       ├── error.util.ts        # Error extraction utilities
 │       ├── format.util.ts       # String formatting utilities
-│       └── logger.util.ts       # Logging utilities
+│       └── logger.util.ts       # Pino logger with multistream
 ├── .env                         # Environment variables (local)
 ├── .gitignore                   # Git ignore rules
 ├── .prettierrc                  # Prettier code formatting config
@@ -128,6 +132,17 @@ npm run dev
 - `npm run lint` - Check code with ESLint
 - `npm run lint:fix` - Fix ESLint issues automatically
 
+## Logging
+
+This project uses [Pino](https://github.com/pinojs/pino) with multistream for advanced logging:
+
+- **Terminal output:** Pretty-printed, colored logs for development.
+- **Log files:** Structured JSON logs per level (`logs/error.log`, `logs/info.log`, `logs/warn.log`, `logs/debug.log`).
+- **Automatic log directory creation:** No manual setup required.
+- **Custom timestamp and uppercase log levels for consistency.**
+
+See [`logger`](src/utils/logger.util.ts) for implementation details.
+
 ## Architecture
 
 ### Modular Structure
@@ -137,7 +152,7 @@ npm run dev
 - **Routes** - Define API endpoints and rate limiting
 - **Schemas** - Data validation rules (Zod)
 - **Middleware** - Cross-cutting concerns (error handling)
-- **Utils** - Reusable utility functions
+- **Utils** - Reusable utility functions (including logging)
 - **Config** - Application configuration and environment validation
 - **Templates** - Handlebars templates for dynamic emails
 
@@ -238,7 +253,7 @@ Content-Type: application/json
 
 - [`capitalizeWord(word)`](src/utils/format.util.ts) - Capitalize first letter of a word
 - [`capitalizeString(value)`](src/utils/format.util.ts) - Capitalize first letter of each word
-- [`logError(error, title)`](src/utils/logger.util.ts) - Structured error logging
+- [`logger`](src/utils/logger.util.ts) - Advanced logging with Pino multistream
 - [`extractErrorInfo(error)`](src/utils/error.util.ts) - Normalized error extraction
 
 ## Environment Configuration
@@ -281,6 +296,11 @@ Content-Type: application/json
 
 - Change `PORT` in `.env` to an available port
 - Or kill the process using the port: `lsof -i :8080`
+
+### Logging Issues
+
+- Log files are created automatically in the `logs/` directory.
+- If logs are missing, check directory permissions and ensure the process has write access.
 
 ---
 
