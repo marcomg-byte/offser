@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
-import { mailRouter, templateRouter } from './routes/index.js';
+import { healthRouter, mailRouter, templateRouter } from './routes/index.js';
 import {
   verifyConnection as verifyMailConnection,
   preloadTemplates,
@@ -31,7 +31,7 @@ const { PORT, NODE_ENV, HTTPS_ENABLED, HTTPS_CERT_PATH, HTTPS_KEY_PATH } = env;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.text({ type: 'text/*' }));
-
+app.use('/health', healthRouter);
 app.use('/mail', mailRouter);
 app.use('/render', templateRouter);
 app.use(errorHandler);
