@@ -1,6 +1,7 @@
 import pino, { multistream } from 'pino';
 import pretty from 'pino-pretty';
 import fs from 'fs';
+import { formatDate } from './format.util.js';
 
 const LOGS_DIR = './logs';
 
@@ -59,7 +60,7 @@ const streams: pino.StreamEntry[] = [
  * Configuration:
  * - Logs all levels (debug, info, warn, error) for comprehensive visibility.
  * - Log level output is uppercase for consistency.
- * - Timestamp format: 'MM/DD/YYYY HH:mm:ss' (en-US locale), with a space separator for clarity.
+ * - Timestamp format: 'MM-DD-YYYY HH:mm:ss' (en-US locale), with a space separator for clarity.
  * - Uses pino-pretty for terminal output, supporting color and emoji rendering.
  * - Writes structured JSON logs to separate files for error, info, warn, and debug levels.
  */
@@ -72,27 +73,8 @@ const logger = pino(
       },
     },
     timestamp: () => {
-      const date = new Date();
-      const day =
-        date.getDate() < 10 ? `0${date.getDate()}` : date.getDate().toString();
-      const month =
-        date.getMonth() + 1 < 10
-          ? `0${date.getMonth() + 1}`
-          : (date.getMonth() + 1).toString();
-      const year = date.getFullYear();
-      const hours =
-        date.getHours() < 10
-          ? `0${date.getHours()}`
-          : date.getHours().toString();
-      const minutes =
-        date.getMinutes() < 10
-          ? `0${date.getMinutes()}`
-          : date.getMinutes().toString();
-      const seconds =
-        date.getSeconds() < 10
-          ? `0${date.getSeconds()}`
-          : date.getSeconds().toString();
-      return `,"time":"${month}/${day}/${year} ${hours}:${minutes}:${seconds}"`;
+      const date = formatDate(new Date());
+      return `,"time":"${date}"`;
     },
   },
   multistream(streams),

@@ -56,4 +56,27 @@ const capitalizeString = (value: string): string => {
   return words.map(capitalizeWord).join(' ');
 };
 
-export { capitalizeString, capitalizeWord };
+/**
+ * Formats a Date object as a string in 'MM-DD-YYYY HH:mm:ss' format.
+ *
+ * Pads month, day, hour, minute, and second with leading zeros as needed.
+ *
+ * @param {Date} date - The Date object to format.
+ * @returns {string} The formatted date string.
+ *
+ * @example
+ * formatDate(new Date('2024-02-05T09:07:03'));
+ * // → '02-05-2024 09:07:03'
+ */
+const formatDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+
+  return `${month}-${day}-${year} ${hours}:${minutes}:${seconds}`;
+};
+
+export { capitalizeString, capitalizeWord, formatDate };
