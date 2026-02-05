@@ -5,12 +5,14 @@ import { Transporter } from 'nodemailer';
  *
  * Thrown when an error occurs during mail transport or SMTP operations.
  * Captures SMTP configuration and the original error for debugging.
+ *
+ * Properties:
+ * - smtpHost: The SMTP host address.
+ * - smtpPort: The SMTP port number.
+ * - smtpUser: The SMTP username.
+ * - secure: Whether the SMTP connection is secure (TLS/SSL).
  */
 class TransporterCreationError extends Error {
-  /**
-   * The original error that caused the mail failure, if available.
-   */
-  public rootError?: unknown;
   /**
    * Whether the SMTP connection is secure (TLS/SSL).
    */
@@ -34,22 +36,20 @@ class TransporterCreationError extends Error {
    * @param smtpPort - The SMTP port number.
    * @param smtpUser - The SMTP username.
    * @param secure - Whether the SMTP connection is secure.
-   * @param rootError - The original error that caused the failure (optional).
    */
   constructor(
     smtpHost: string,
     smtpPort: number,
     smtpUser: string,
     secure: boolean,
-    rootError?: unknown,
+    cause?: unknown,
   ) {
-    super('Mail Service Error');
+    super('Mail Service Error', { cause });
     this.name = 'MailError';
     this.smtpHost = smtpHost;
     this.smtpPort = smtpPort;
     this.smtpUser = smtpUser;
     this.secure = secure;
-    this.rootError = rootError;
   }
 }
 
@@ -58,12 +58,11 @@ class TransporterCreationError extends Error {
  *
  * Thrown when the application fails to verify the SMTP connection during startup or health checks.
  * Captures the original error for debugging purposes.
+ *
+ * Properties:
+ * - transporter: The nodemailer transporter instance used.
  */
 class ConnectionVerificationError extends Error {
-  /**
-   * The original error that caused the connection verification failure, if available.
-   */
-  public rootError?: unknown;
   /**
    * The nodemailer transporter instance used, if available.
    */
@@ -71,13 +70,12 @@ class ConnectionVerificationError extends Error {
 
   /**
    * Constructs a new ConnectionVerificationError.
-   * @param rootError - The original error that caused the verification failure (optional).
+   * @param cause - The original error that caused the verification failure (optional).
    * @param transporter - The nodemailer transporter instance (optional).
    */
-  constructor(transporter: Transporter, rootError?: unknown) {
-    super('SMTP Connection Verification Failed');
+  constructor(transporter: Transporter, cause?: unknown) {
+    super('SMTP Connection Verification Failed', { cause });
     this.name = 'ConnectionVerificationError';
-    this.rootError = rootError;
     this.transporter = transporter;
   }
 }
@@ -87,12 +85,15 @@ class ConnectionVerificationError extends Error {
  *
  * Thrown when an error occurs while sending an email message.
  * Captures recipient, subject, content, transporter, and the original error for debugging.
+ *
+ * Properties:
+ * - to: The recipient email address.
+ * - subject: The subject of the email.
+ * - text: The plain text content of the email (if provided).
+ * - html: The HTML content of the email (if provided).
+ * - transporter: The nodemailer transporter instance used to send the email.
  */
 class MailDeliveryError extends Error {
-  /**
-   * The original error that caused the mail delivery failure, if available.
-   */
-  public rootError?: unknown;
   /**
    * The recipient email address.
    */
@@ -121,7 +122,7 @@ class MailDeliveryError extends Error {
    * @param subject - The subject of the email.
    * @param text - The plain text content of the email (optional).
    * @param html - The HTML content of the email (optional).
-   * @param rootError - The original error that caused the failure (optional).
+   * @param cause - The original error that caused the failure (optional).
    */
   constructor(
     transporter: Transporter,
@@ -129,11 +130,10 @@ class MailDeliveryError extends Error {
     subject: string,
     text?: string,
     html?: string,
-    rootError?: unknown,
+    cause?: unknown,
   ) {
-    super('Failed to Send Mail');
+    super('Failed to Send Mail', { cause });
     this.name = 'MailDeliveryError';
-    this.rootError = rootError;
     this.transporter = transporter;
     this.to = to;
     this.subject = subject;
