@@ -6,11 +6,12 @@ import {
   preloadTemplates,
 } from './services/index.js';
 import { errorHandler } from './middleware/index.js';
-import { extractErrorInfo, logger } from './utils/index.js';
+import { extractErrorInfo, gracefulShutdown, logger } from './utils/index.js';
 import { CertificateNotFoundError } from './errors/index.js';
 import { env } from './config/env.js';
 import { execSync } from 'child_process';
 import https from 'https';
+import http from 'http';
 import fs from 'fs';
 
 /** Sets the console code page to UTF-8 on Windows for proper encoding */
@@ -122,19 +123,43 @@ const onServerStart = (): void => {
 };
 
 /**
- * Starts the Express server using HTTPS if enabled, otherwise falls back to HTTP.
+ * Starts the HTTP or HTTPS server based on environment configuration.
  *
- * Checks the HTTPS_ENABLED environment variable to determine which protocol to use.
- * If HTTPS is enabled, creates and starts an HTTPS server with the provided certificate and key.
- * Otherwise, starts a standard HTTP server.
+ * Chooses HTTPS if enabled and certificates are present, otherwise falls back to HTTP.
+ * Binds the server to the configured port and executes the onServerStart callback.
+ *
+ * @returns {http.Server | https.Server} The created server instance (HTTP or HTTPS).
  */
-const startServer = (): void => {
+const startServer = (): http.Server | https.Server => {
+  let server: http.Server | https.Server;
+
   if (HTTPS_ENABLED) {
-    const httpsServer = createHttpsServer();
-    httpsServer.listen(PORT, onServerStart);
+    server = createHttpsServer();
   } else {
-    app.listen(PORT, onServerStart);
+    server = http.createServer(app);
   }
+
+  server.listen(PORT, onServerStart);
+
+  return server;
 };
 
-startServer();
+const server = startServer();
+
+process.on('SIGTERM', () => gracefulShutdown(server, 'SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown(server, 'SIGINT'));
+
+process.on('uncaughtException', (error) => {
+  const errorInfo = extractErrorInfo(error);
+  logger.fatal({ errorInfo }, 'Uncaught Exception, forcing shutdown...');
+  gracefulShutdown(server, 'UNCAUGHT_EXCEPTION');
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  const errorInfo = extractErrorInfo(reason);
+  logger.fatal(
+    { reason: errorInfo, promise },
+    'Unhandled Rejection, forcing shutdown...',
+  );
+  gracefulShutdown(server, 'UNHANDLED_REJECTION');
+});
