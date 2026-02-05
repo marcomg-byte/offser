@@ -1,6 +1,7 @@
 import {
   TemplateCompileError,
   TemplatePreloadError,
+  UnknownTemplateError,
 } from './template.error.js';
 import {
   MailDeliveryError,
@@ -16,4 +17,5 @@ export {
   TransporterCreationError,
   TemplateCompileError,
   TemplatePreloadError,
+  UnknownTemplateError,
 };

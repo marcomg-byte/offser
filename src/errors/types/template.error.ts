@@ -7,8 +7,6 @@ import { ErrorInfo } from './error.js';
  * Used for consistent error handling and logging when a template fails to compile or render.
  */
 interface TemplateCompileErrorInfo extends ErrorInfo {
-  /** The original error that caused the template compilation failure, if available. */
-  rootError?: unknown;
   /** The name of the template that failed to compile. */
   templateName: string;
   /** The data provided to the template during compilation. */
@@ -16,14 +14,14 @@ interface TemplateCompileErrorInfo extends ErrorInfo {
 }
 
 /**
- * Extended error information for template preload failures.
+ * Extended error information for unknown template errors.
  *
- * Captures the underlying error that occurred during the template preloading process.
- * Used for consistent error handling and logging when templates fail to preload at startup or runtime.
+ * Captures the template name (if available) and the underlying error for debugging purposes.
+ * Used for consistent error handling and logging when an unexpected template-related error occurs.
  */
-interface TemplatePreloadErrorInfo extends ErrorInfo {
-  /** The original error that caused the template preload failure, if available. */
-  rootError?: unknown;
+interface UnknownTemplateErrorInfo extends ErrorInfo {
+  /** The name of the template involved in the error, if available. */
+  templateName?: string;
 }
 
-export type { TemplateCompileErrorInfo, TemplatePreloadErrorInfo };
+export type { TemplateCompileErrorInfo, UnknownTemplateErrorInfo };

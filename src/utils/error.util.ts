@@ -5,6 +5,7 @@ import {
   TemplateCompileError,
   TemplatePreloadError,
   TransporterCreationError,
+  UnknownTemplateError,
 } from '../errors/index.js';
 import type {
   CertificateNotFoundErrorInfo,
@@ -12,8 +13,8 @@ import type {
   ErrorInfo,
   MailDeliveryErrorInfo,
   TemplateCompileErrorInfo,
-  TemplatePreloadErrorInfo,
   TransporterCreationErrorInfo,
+  UnknownTemplateErrorInfo,
   ZodErrorInfo,
 } from '../errors/types/index.js';
 import { prettifyError, ZodError } from 'zod';
@@ -30,9 +31,9 @@ type ExtractedInfo =
   | CertificateNotFoundErrorInfo
   | ConnectionVerificationErrorInfo
   | TemplateCompileErrorInfo
-  | TemplatePreloadErrorInfo
   | MailDeliveryErrorInfo
   | TransporterCreationErrorInfo
+  | UnknownTemplateErrorInfo
   | ZodErrorInfo;
 
 /**
@@ -101,7 +102,6 @@ const extractErrorInfo = (error: unknown): ExtractedInfo => {
   if (error instanceof ConnectionVerificationError) {
     return {
       ...baseInfo,
-      rootError: error?.rootError,
       transporter: error.transporter,
     };
   }
@@ -109,7 +109,6 @@ const extractErrorInfo = (error: unknown): ExtractedInfo => {
   if (error instanceof MailDeliveryError) {
     return {
       ...baseInfo,
-      rootError: error?.rootError,
       to: error.to,
       subject: error.subject,
       text: error.text,
@@ -121,7 +120,6 @@ const extractErrorInfo = (error: unknown): ExtractedInfo => {
   if (error instanceof TemplateCompileError) {
     return {
       ...baseInfo,
-      rootError: error?.rootError,
       templateData: error.templateData,
       templateName: error.templateName,
     };
@@ -130,18 +128,23 @@ const extractErrorInfo = (error: unknown): ExtractedInfo => {
   if (error instanceof TemplatePreloadError) {
     return {
       ...baseInfo,
-      rootError: error?.rootError,
     };
   }
 
   if (error instanceof TransporterCreationError) {
     return {
       ...baseInfo,
-      rootError: error?.rootError,
       smtpHost: error.smtpHost,
       smtpPort: error.smtpPort,
       smtpUser: error.smtpUser,
       secure: error.secure,
+    };
+  }
+
+  if (error instanceof UnknownTemplateError) {
+    return {
+      ...baseInfo,
+      templateName: error.templateName,
     };
   }
 

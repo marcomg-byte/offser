@@ -8,8 +8,6 @@ import { Transporter } from 'nodemailer';
  * Used for consistent error handling and logging during mail service startup or health checks.
  */
 interface ConnectionVerificationErrorInfo extends ErrorInfo {
-  /** The original error that caused the connection verification failure, if available. */
-  rootError?: unknown;
   /** The nodemailer transporter instance used during verification. */
   transporter: Transporter;
 }
@@ -21,8 +19,6 @@ interface ConnectionVerificationErrorInfo extends ErrorInfo {
  * Used for consistent error handling and logging when sending an email fails.
  */
 interface MailDeliveryErrorInfo extends ErrorInfo {
-  /** The original error that caused the mail delivery failure, if available. */
-  rootError?: unknown;
   /** The recipient email address. */
   to: string;
   /** The subject of the email. */
@@ -42,8 +38,6 @@ interface MailDeliveryErrorInfo extends ErrorInfo {
  * Used for consistent error handling and logging when creating a nodemailer transporter fails.
  */
 interface TransporterCreationErrorInfo extends ErrorInfo {
-  /** The original error that caused the transporter creation failure, if available. */
-  rootError?: unknown;
   /** The SMTP host address used for the transporter. */
   smtpHost: string;
   /** The SMTP port number used for the transporter. */
