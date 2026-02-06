@@ -5,7 +5,7 @@ import {
   verifyConnection as verifyMailConnection,
   preloadTemplates,
 } from './services/index.js';
-import { errorHandler } from './middleware/index.js';
+import { errorHandler, notFoundHandler } from './middleware/index.js';
 import { extractErrorInfo, gracefulShutdown, logger } from './utils/index.js';
 import { CertificateNotFoundError } from './errors/index.js';
 import { env } from './config/env.js';
@@ -20,8 +20,7 @@ if (process.platform === 'win32') {
     execSync('chcp 65001', { stdio: 'ignore' });
   } catch (error: unknown) {
     const errorInfo = extractErrorInfo(error);
-    console.error(' ❌ Failed to set console to UTF-8 encoding');
-    console.error(errorInfo);
+    logger.error({ errorInfo }, 'Failed to set console to UTF-8 encoding');
   }
 }
 
@@ -34,6 +33,7 @@ app.use(express.text({ type: 'text/*' }));
 app.use('/health', healthRouter);
 app.use('/mail', mailRouter);
 app.use('/render', templateRouter);
+app.use(notFoundHandler);
 app.use(errorHandler);
 
 /**
