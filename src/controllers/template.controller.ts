@@ -21,7 +21,7 @@ const templateHandler = (req: Request, res: Response, next: NextFunction) => {
     } else if (templateName === 'shipment') {
       bodyData = shipmentTemplateSchema.parse(req.body);
     } else {
-      bodyData = {};
+      bodyData = req.body as Record<string, unknown>;
     }
 
     const html = compileTemplate(templateName, bodyData);
