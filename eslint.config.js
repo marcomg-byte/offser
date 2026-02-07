@@ -33,7 +33,8 @@ export default [
             ecmaVersion: 'latest',
             sourceType: 'module',
             parserOptions: {
-                project: './tsconfig.json',
+                project: ['./tsconfig.json', './tsconfig.test.json'],
+                tsconfigRootDir: import.meta.dirname,
             },
         },
         rules: {

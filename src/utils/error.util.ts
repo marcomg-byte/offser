@@ -1,40 +1,16 @@
-import {
-  CertificateNotFoundError,
-  ConnectionVerificationError,
-  MailDeliveryError,
-  TemplateCompileError,
-  TemplatePreloadError,
-  TransporterCreationError,
-  UnknownTemplateError,
-} from '../errors/index.js';
-import type {
-  CertificateNotFoundErrorInfo,
-  ConnectionVerificationErrorInfo,
-  ErrorInfo,
-  MailDeliveryErrorInfo,
-  TemplateCompileErrorInfo,
-  TransporterCreationErrorInfo,
-  UnknownTemplateErrorInfo,
-  ZodErrorInfo,
-} from '../errors/types/index.js';
+import type { ErrorInfo } from '../errors/types/index.js';
 import { prettifyError, ZodError } from 'zod';
 
 /**
- * Union type representing all possible normalized error info structures returned by extractErrorInfo.
+ * Represents a normalized error info object returned by extractErrorInfo.
  *
- * This type includes all supported error info interfaces for template, mail, validation, and HTTPS certificate errors.
- * It ensures type safety and consistency for error handling and API responses throughout the application,
- * covering every error type that can be processed by extractErrorInfo.
+ * Extends ErrorInfo with any additional custom properties found on the error instance.
+ * This allows for flexible error logging and API responses that include both standard
+ * and custom error fields.
  */
-type ExtractedInfo =
-  | ErrorInfo
-  | CertificateNotFoundErrorInfo
-  | ConnectionVerificationErrorInfo
-  | TemplateCompileErrorInfo
-  | MailDeliveryErrorInfo
-  | TransporterCreationErrorInfo
-  | UnknownTemplateErrorInfo
-  | ZodErrorInfo;
+interface ExtractedInfo extends ErrorInfo {
+  [key: string]: unknown;
+}
 
 /**
  * Extracts the base error information from a standard Error object.
@@ -45,12 +21,46 @@ type ExtractedInfo =
  * @param error - The Error instance to extract info from.
  * @returns {ErrorInfo} The normalized error info object.
  */
-const extractBaseInfo = (error: Error): ErrorInfo => ({
-  cause: error?.cause,
-  message: error.message,
-  name: error.name,
-  stack: error?.stack,
-});
+const extractBaseProps = (error: unknown): ErrorInfo => {
+  if (error instanceof Error) {
+    return {
+      cause: error?.cause,
+      message: error.message,
+      name: error.name,
+      stack: error?.stack,
+    };
+  }
+
+  return {
+    cause: undefined,
+    message: 'An Unknown Error Occurred',
+    name: 'UnknownError',
+    stack: undefined,
+  };
+};
+
+/**
+ * Extracts custom (non-standard) properties from an Error instance.
+ *
+ * Iterates over the error's own enumerable properties and filters out standard Error properties
+ * (name, message, stack, cause). Returns an object containing only custom properties added by
+ * error subclasses.
+ *
+ * @param error - The Error instance to extract custom properties from.
+ * @returns {Record<string, unknown>} An object containing only custom properties.
+ */
+const extractCustomProps = (error: Error): Record<string, unknown> => {
+  const baseProps = new Set(['name', 'message', 'stack', 'cause']);
+  const customProps: Record<string, unknown> = {};
+
+  for (const key of Object.keys(error)) {
+    if (!baseProps.has(key)) {
+      customProps[key] = Reflect.get(error, key);
+    }
+  }
+
+  return customProps;
+};
 
 /**
  * Extracts and normalizes error information from various error types.
@@ -60,8 +70,7 @@ const extractBaseInfo = (error: Error): ErrorInfo => ({
  *
  * Handles:
  * - Zod validation errors (returns prettified error string)
- * - Template compilation and preload errors (includes template context)
- * - Mail service errors (includes mail context)
+ * - Custom error classes (automatically extracts custom properties)
  * - Generic errors (returns base error info)
  * - Unknown error types (returns a generic error info object)
  *
@@ -79,88 +88,26 @@ const extractBaseInfo = (error: Error): ErrorInfo => ({
  * // info: { message: 'Something went wrong', name: 'Error', ... }
  */
 const extractErrorInfo = (error: unknown): ExtractedInfo => {
-  let baseInfo: ErrorInfo;
-
   if (error instanceof ZodError) {
     return {
-      error: prettifyError(error),
+      message: prettifyError(error),
+      name: 'ZodError',
     };
   }
 
-  if (error instanceof Error) {
-    baseInfo = extractBaseInfo(error);
+  const baseProps: ErrorInfo = extractBaseProps(error);
+
+  if (!(error instanceof Error)) {
+    return baseProps as ExtractedInfo;
   }
 
-  if (error instanceof CertificateNotFoundError) {
-    return {
-      ...baseInfo,
-      certPath: error.certPath,
-      keyPath: error.keyPath,
-    };
-  }
+  const customProps = extractCustomProps(error);
 
-  if (error instanceof ConnectionVerificationError) {
-    return {
-      ...baseInfo,
-      transporter: error.transporter,
-    };
-  }
-
-  if (error instanceof MailDeliveryError) {
-    return {
-      ...baseInfo,
-      to: error.to,
-      subject: error.subject,
-      text: error.text,
-      html: error.html,
-      transporter: error.transporter,
-    };
-  }
-
-  if (error instanceof TemplateCompileError) {
-    return {
-      ...baseInfo,
-      templateData: error.templateData,
-      templateName: error.templateName,
-    };
-  }
-
-  if (error instanceof TemplatePreloadError) {
-    return {
-      ...baseInfo,
-    };
-  }
-
-  if (error instanceof TransporterCreationError) {
-    return {
-      ...baseInfo,
-      smtpHost: error.smtpHost,
-      smtpPort: error.smtpPort,
-      smtpUser: error.smtpUser,
-      secure: error.secure,
-    };
-  }
-
-  if (error instanceof UnknownTemplateError) {
-    return {
-      ...baseInfo,
-      templateName: error.templateName,
-    };
-  }
-
-  if (error instanceof Error) {
-    return baseInfo;
-  }
-
-  baseInfo = {
-    cause: undefined,
-    message: 'An Unknown Error Occurred',
-    name: 'UnknownError',
-    stack: undefined,
+  return {
+    ...baseProps,
+    ...customProps,
   };
-
-  return baseInfo;
 };
 
 export { extractErrorInfo };
-export type { ExtractedInfo as ErrorInfo };
+export type { ExtractedInfo };

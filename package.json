@@ -4,19 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "clean": "rimraf dist",
-    "clean:logs": "rimraf logs",
     "backup:logs": "npx cpy logs/**/*.log backup/logs --parents",
     "build": "npx tsc && npm run build:templates && npm run build:certs",
     "build:templates": "npx cpy src/templates/**/* dist/templates --parents",
     "build:certs": "npx cpy src/config/certs/**/* dist/config/certs --parents",
-    "watch:templates": "nodemon --watch src/templates --ext hbs --exec \"npm run build:templates\"",
+    "clean": "rimraf dist",
+    "clean:logs": "rimraf logs",
     "dev": "concurrently \"npm run watch:templates\" \"nodemon --watch src --ext ts --exec tsx src/index.ts\"",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "prepare": "npm run clean && npm run build",
     "start": "node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "watch:templates": "nodemon --watch src/templates --ext hbs --exec \"npm run build:templates\""
   },
   "keywords": [],
   "author": "",
@@ -39,6 +42,8 @@
     "@types/handlebars": "^4.0.40",
     "@types/node": "^25.0.3",
     "@types/nodemailer": "^7.0.4",
+    "@types/supertest": "^6.0.3",
+    "@vitest/coverage-v8": "^4.0.18",
     "cpy-cli": "^6.0.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
@@ -46,9 +51,11 @@
     "nodemon": "^3.1.11",
     "prettier": "^3.8.1",
     "rimraf": "^6.1.2",
+    "supertest": "^7.2.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.52.0"
+    "typescript-eslint": "^8.52.0",
+    "vitest": "^4.0.18"
   }
 }

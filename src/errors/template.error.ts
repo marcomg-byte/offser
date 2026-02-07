@@ -52,21 +52,21 @@ class TemplatePreloadError extends Error {
  * Custom error for unknown template failures.
  *
  * Thrown when an unexpected error occurs related to template operations that does not fit other error types.
- * Captures the template name (if available) and the original error for debugging purposes.
+ * Captures the template name and the original error for debugging purposes.
  *
  * Properties:
- * - templateName: The name of the template involved in the error (optional)
+ * - templateName: The name of the template involved in the error
  */
 class UnknownTemplateError extends Error {
-  /** The name of the template involved in the error, if available. */
-  public templateName?: string;
+  /** The name of the template involved in the error. */
+  public templateName: string;
   /**
    * Constructs a new UnknownTemplateError.
-   * @param templateName - The name of the template involved in the error (optional).
+   * @param templateName - The name of the template involved in the error.
    * @param cause - The original error that caused the failure (optional).
    */
-  constructor(templateName?: string, cause?: unknown) {
-    super('An unknown template error occurred', { cause });
+  constructor(templateName: string, cause?: unknown) {
+    super(`Unknown template: ${templateName}`, { cause });
     this.name = 'UnknownTemplateError';
     this.templateName = templateName;
   }
