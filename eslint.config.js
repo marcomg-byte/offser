@@ -1,6 +1,6 @@
 import jseslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
-import prettier, { rules } from 'eslint-config-prettier';
+import prettier from 'eslint-config-prettier';
 import prettierPlugin from 'eslint-plugin-prettier';
 
 export default [

@@ -23,6 +23,7 @@
  * // → 'Javascript'
  */
 const capitalizeWord = (word: string): string => {
+  if (!word || word.length === 0) return word;
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 };
 
@@ -79,4 +80,4 @@ const formatDate = (date: Date): string => {
   return `${month}-${day}-${year} ${hours}:${minutes}:${seconds}`;
 };
 
-export { capitalizeString, capitalizeWord, formatDate };
+export { capitalizeWord, capitalizeString, formatDate };
