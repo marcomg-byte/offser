@@ -4,11 +4,13 @@
     "noEmit": true
   },
   "include": [
+    "__mocks__",
+    "**/__mocks__/**",
     "src/**/*.test.ts",
     "src/**/*.spec.ts"
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
   ]
 }

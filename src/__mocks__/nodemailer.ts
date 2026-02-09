@@ -1,5 +1,11 @@
 import type { Transporter } from 'nodemailer';
 
+/**
+ * Creates a mock nodemailer Transporter object for testing.
+ *
+ * @param overrides - Optional properties to override the default mock transporter.
+ * @returns A mock Transporter instance with default and overridden properties.
+ */
 function createMockTransporter(overrides?: Partial<Transporter>): Transporter {
   return {
     options: {
