@@ -19,6 +19,7 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
+    "test:clean": "rimraf coverage",
     "watch:templates": "nodemon --watch src/templates --ext hbs --exec \"npm run build:templates\""
   },
   "keywords": [],
