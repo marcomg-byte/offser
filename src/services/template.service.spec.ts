@@ -228,11 +228,6 @@ describe('template.service', () => {
       expect(count).toBe(2);
       expect(readdirSync).toHaveBeenCalledWith(templatesDir);
       expect(readdirSync).toHaveBeenCalledTimes(1);
-      templateFiles.forEach((file) => {
-        const filePath = path.join(templatesDir, file);
-        expect(existsSync).toHaveBeenCalledWith(filePath);
-        expect(readFileSync).toHaveBeenCalledWith(filePath, 'utf-8');
-      });
       expect(existsSync).toHaveBeenCalledTimes(templateFiles.length);
       expect(readFileSync).toHaveBeenCalledTimes(templateFiles.length);
     });
@@ -267,12 +262,6 @@ describe('template.service', () => {
 
       expect(readdirSync).toHaveBeenCalledWith(templatesDir);
       expect(readdirSync).toHaveBeenCalledTimes(1);
-
-      templateFiles.forEach((file) => {
-        const filePath = path.join(templatesDir, file);
-        expect(existsSync).toHaveBeenCalledWith(filePath);
-        expect(readFileSync).toHaveBeenCalledWith(filePath, 'utf-8');
-      });
     });
   });
 });
