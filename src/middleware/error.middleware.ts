@@ -8,7 +8,6 @@ import {
   TemplateCompileError,
   TemplatePreloadError,
 } from '../errors/index.js';
-import type { ErrorInfo } from '../utils/error.util.js';
 
 /**
 
@@ -94,7 +93,7 @@ function errorHandler(
   res: Response,
   _next: NextFunction,
 ) {
-  const errorInfo: ErrorInfo = extractErrorInfo(error);
+  const errorInfo = extractErrorInfo(error);
   let statusCode = 500;
   let title = 'Unknown Error Occurred';
 

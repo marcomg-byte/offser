@@ -45,7 +45,7 @@ class TransporterCreationError extends Error {
     cause?: unknown,
   ) {
     super('Mail Service Error', { cause });
-    this.name = 'MailError';
+    this.name = 'TransporterCreationError';
     this.smtpHost = smtpHost;
     this.smtpPort = smtpPort;
     this.smtpUser = smtpUser;

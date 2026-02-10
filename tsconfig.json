@@ -24,5 +24,11 @@
     "noImplicitAny": true,
   },
   "include": ["src"],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/__mocks__",
+    "**/__mocks__/**/*.ts"
+  ]
 }

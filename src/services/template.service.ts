@@ -11,7 +11,7 @@ const templatesRelativePath = '../templates';
 
 const templateCache = new Map<string, handlebars.TemplateDelegate>();
 
-const shouldCache = env.NODE_ENV === 'production';
+const shouldCache = env.NODE_ENV === 'PRODUCTION';
 
 /**
  * Compiles and renders a Handlebars template with the provided data.
