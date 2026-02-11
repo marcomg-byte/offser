@@ -322,6 +322,29 @@ npm test
 7. Push to the branch: `git push origin feature/my-feature`
 8. Open a pull request
 
+## CLI Usage (Global Install)
+
+You can use Offser as a command-line tool by installing it globally with npm:
+
+```sh
+npm install -g offser
+```
+
+This will make the `offser` command available anywhere on your system.
+
+### Example Usage
+
+Start the server from the CLI:
+
+```sh
+offser
+```
+
+You can also pass environment variables or use a `.env` file for configuration. The CLI will use the same entry point and options as described above.
+
+**Note:** Ensure you have built the project (`npm run build`) before publishing or installing globally, so the `dist/index.js` file exists and is executable.
+
+---
 ## Troubleshooting
 
 ### SMTP Connection Issues
