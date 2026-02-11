@@ -6,30 +6,73 @@ import {
   ConnectionVerificationError,
 } from '../errors/index.js';
 
-const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, MAIL_FROM } = env;
+const { SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS, MAIL_FROM } =
+  env;
 
 /**
  * Creates and configures a Nodemailer transporter for SMTP email delivery.
  *
- * Initializes a transporter with SMTP settings from environment variables
- * (host, port, user credentials). Uses a non-secure connection (SSL/TLS disabled).
+ * This function initializes a transporter using SMTP settings from environment variables:
+ * - `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`.
+ *
+ * - If `SMTP_SECURE` is `true`, the function enforces that `SMTP_PORT` must be 465 (standard for SSL/TLS).
+ *   If not, it throws a `TransporterCreationError` indicating an invalid secure configuration.
+ * - If `SMTP_SECURE` is `false`, the function enforces that `SMTP_PORT` must be 587 (standard for STARTTLS/non-secure).
+ *   If not, it throws a `TransporterCreationError` indicating an invalid non-secure configuration.
+ * - Any other error during transporter creation is caught and wrapped in a `TransporterCreationError`.
  *
  * @returns {Transporter | null} A configured Nodemailer transporter instance, or null if initialization fails.
  *
  * @throws {TransporterCreationError} If transporter creation fails due to invalid configuration or other errors.
  *
  * @example
+ * // Secure connection (SSL/TLS)
+ * process.env.SMTP_SECURE = 'true';
+ * process.env.SMTP_PORT = '465';
+ * const transporter = createTransporter();
+ * if (transporter) {
+ *   await transporter.verify();
+ * }
+ *
+ * @example
+ * // Non-secure connection (STARTTLS)
+ * process.env.SMTP_SECURE = 'false';
+ * process.env.SMTP_PORT = '587';
  * const transporter = createTransporter();
  * if (transporter) {
  *   await transporter.verify();
  * }
  */
 function createTransporter(): Transporter | null {
+  if (SMTP_SECURE === true && SMTP_PORT !== 465) {
+    throw new TransporterCreationError(
+      SMTP_HOST,
+      SMTP_PORT,
+      SMTP_USER,
+      SMTP_SECURE,
+      new Error(
+        'Invalid SMTP configuration: Secure connections (SMTP_SECURE=true) must use port 465.',
+      ),
+    );
+  }
+
+  if (SMTP_SECURE === false && SMTP_PORT !== 587) {
+    throw new TransporterCreationError(
+      SMTP_HOST,
+      SMTP_PORT,
+      SMTP_USER,
+      SMTP_SECURE,
+      new Error(
+        'Invalid SMTP configuration: Non-secure connections (SMTP_SECURE=false) should use port 587.',
+      ),
+    );
+  }
+
   try {
     return createTransport({
       host: SMTP_HOST,
       port: SMTP_PORT,
-      secure: false,
+      secure: SMTP_SECURE,
       auth: {
         user: SMTP_USER,
         pass: SMTP_PASS,
@@ -40,7 +83,7 @@ function createTransporter(): Transporter | null {
       SMTP_HOST,
       SMTP_PORT,
       SMTP_USER,
-      false,
+      SMTP_SECURE,
       error,
     );
   }
