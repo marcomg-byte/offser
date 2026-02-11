@@ -1,4 +1,5 @@
-import { describe, it, afterEach, expect, vi } from 'vitest';
+import { describe, it, afterEach, beforeEach, expect, vi, Mock } from 'vitest';
+import { createTransport } from 'nodemailer';
 import {
   ConnectionVerificationError,
   MailDeliveryError,
@@ -6,11 +7,32 @@ import {
 import { createMockTransporter } from '../__mocks__/index.js';
 import { sendMail, verifyConnection } from './index.js';
 
+vi.mock('nodemailer', () => ({
+  createTransport: vi.fn(),
+}));
 vi.mock('./index.js');
+vi.mock('../config/env.ts');
 
 describe('mail.service', () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
   afterEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe('createTransporter', () => {
+    it('should throw TransporterCreationError if createTransport fails', async () => {
+      const error = new Error('Transporter creation failed');
+      (createTransport as Mock).mockImplementation(() => {
+        throw error;
+      });
+
+      await expect(import('./mail.service.js')).rejects.toMatchObject({
+        name: 'TransporterCreationError',
+      });
+    });
   });
 
   describe('verifyConnection', () => {
@@ -36,6 +58,22 @@ describe('mail.service', () => {
         ConnectionVerificationError,
       );
       expect(verifyConnection).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw ConnectionVerificationError when transporter.verify throws', async () => {
+      const mockTransporter = {
+        verify: vi.fn(() => {
+          throw new Error('Verification failed');
+        }),
+        sendMail: vi.fn(),
+      };
+      (createTransport as Mock).mockReturnValue(mockTransporter);
+
+      const { verifyConnection } = await import('./mail.service.js');
+
+      await expect(verifyConnection()).rejects.toMatchObject({
+        name: 'ConnectionVerificationError',
+      });
     });
   });
 
@@ -106,6 +144,22 @@ describe('mail.service', () => {
       expect(result).toBe(expectedResponse);
       expect(sendMail).toHaveBeenCalledWith(htmlOnlyOptions);
       expect(sendMail).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw MailDeliveryError when transporter.sendMail throws', async () => {
+      const mockTransporter = {
+        sendMail: vi.fn(() => {
+          throw new Error('SMTP error');
+        }),
+        verify: vi.fn(),
+      };
+      (createTransport as Mock).mockReturnValue(mockTransporter);
+
+      const { sendMail } = await import('./mail.service.js');
+
+      await expect(sendMail(mailOptions)).rejects.toMatchObject({
+        name: 'MailDeliveryError',
+      });
     });
   });
 });
