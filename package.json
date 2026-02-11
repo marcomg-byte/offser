@@ -2,7 +2,10 @@
   "name": "offser",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "bin": {
+    "offser": "dist/index.js"
+  },
   "scripts": {
     "backup:logs": "npx cpy logs/**/*.log backup/logs --parents",
     "build": "npx tsc && npm run build:templates && npm run build:certs",
