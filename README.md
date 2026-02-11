@@ -131,6 +131,8 @@ npm run dev
 - `npm start` - Run the production build
 - `npm run lint` - Check code with ESLint
 - `npm run lint:fix` - Fix ESLint issues automatically
+- `npm test` - Run unit and integration tests with Vitest
+- `npm run coverage` - Generate a test coverage report
 
 ## Logging
 
@@ -166,6 +168,21 @@ Centralized error handling middleware catches and processes:
 All errors are logged with detailed information including stack traces and error context.
 
 ## API Endpoints
+
+### Health Check
+
+- **Endpoint**: `GET /health`
+- **Description**: Check the server's operational status, uptime, and current timestamp. Useful for monitoring and load balancer health checks.
+
+**Success Response (200):**
+```json
+{
+  "status": "ok",
+  "timestamp": "2023-10-27T10:00:00.000Z",
+  "localDate": "10-27-2023 10:00:00",
+  "uptime": 120.5
+}
+```
 
 ### Send Email
 
@@ -215,7 +232,8 @@ All errors are logged with detailed information including stack traces and error
   "title": "Mail Service Error",
   "name": "MailDeliveryError",
   "message": "...",
-  ...
+  "stack": "...",
+  "cause": { ... }
 }
 ```
 
@@ -249,22 +267,49 @@ Content-Type: application/json
 }
 ```
 
+**Server Error Response (500):**
+```json
+{
+  "title": "Template Compilation Error",
+  "name": "TemplateCompileError",
+  "message": "...",
+  "stack": "...",
+  "cause": { ... }
+}
+```
+
 ## Key Utilities
 
-- [`capitalizeWord(word)`](src/utils/format.util.ts) - Capitalize first letter of a word
-- [`capitalizeString(value)`](src/utils/format.util.ts) - Capitalize first letter of each word
-- [`logger`](src/utils/logger.util.ts) - Advanced logging with Pino multistream
-- [`extractErrorInfo(error)`](src/utils/error.util.ts) - Normalized error extraction
+- [`capitalizeWord(word)`](src/utils/format.util.ts) - Capitalize the first letter of a word.
+- [`capitalizeString(value)`](src/utils/format.util.ts) - Capitalize the first letter of each word in a string.
+- [`formatDate(date)`](src/utils/format.util.ts) - Formats a Date object into `MM-DD-YYYY HH:mm:ss`.
+- [`logger`](src/utils/logger.util.ts) - Advanced logging with Pino multistream.
+- [`extractErrorInfo(error)`](src/utils/error.util.ts) - Normalized error extraction for consistent logging.
+- [`gracefulShutdown(server, signal)`](src/utils/shutdown.util.ts) - Handles graceful server shutdown.
 
 ## Environment Configuration
 
-- [`required(name)`](src/config/env.ts) - Retrieve required environment variables with validation
+- [`required(name)`](src/config/env.ts) - Retrieve required environment variables with validation.
 - [`env`](src/config/env.ts) - Application configuration object with all environment settings
 
 ## Code Quality
 
 - **ESLint** - Code linting with TypeScript support ([`eslint.config.js`](eslint.config.js))
 - **Prettier** - Code formatting ([`.prettierrc`](.prettierrc))
+
+## Testing
+
+This project uses [Vitest](https://vitest.dev/) for unit and integration testing.
+
+- **Configuration**: Test settings are defined in [`vitest.config.ts`](vitest.config.ts).
+- **Test Files**: Tests are located alongside the source files with a `.spec.ts` or `.test.ts` extension.
+- **Mocks**: Mocks for modules like `nodemailer`, `fs`, and internal utilities are located in `__mocks__` directories to isolate tests.
+- **Coverage**: Code coverage is generated using `v8` and can be viewed in the `coverage/` directory after running `npm run coverage`.
+
+To run all tests:
+```sh
+npm test
+```
 
 ## Development Workflow
 
