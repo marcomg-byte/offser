@@ -232,6 +232,24 @@ describe('template.service', () => {
       expect(readFileSync).toHaveBeenCalledTimes(templateFiles.length);
     });
 
+    it('should skip files that not exist', () => {
+      const templateFiles = ['template1.hbs', 'template2.hbs'];
+      vi.mocked(readdirSync).mockReturnValue(templateFiles);
+      vi.mocked(existsSync).mockImplementation((file) => {
+        return file === path.join(templatesDir, 'template1.hbs');
+      });
+      vi.mocked(readFileSync).mockReturnValue(templateSource);
+
+      const count = preloadTemplates();
+      expect(count).toBe(1);
+      expect(existsSync).toHaveBeenCalledWith(
+        path.join(templatesDir, 'template1.hbs'),
+      );
+      expect(existsSync).toHaveBeenCalledWith(
+        path.join(templatesDir, 'template2.hbs'),
+      );
+    });
+
     it('should throw TemplatePreloadError if readdirSync fails', () => {
       const dirError = new Error('Directory not found');
 

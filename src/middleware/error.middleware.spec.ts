@@ -1,7 +1,7 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import type { Mock } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
-import { unknown, z as zod } from 'zod';
+import { z as zod } from 'zod';
 import { errorHandler } from './error.middleware.js';
 import { logger, extractErrorInfo } from '../utils/index.js';
 import { createMockTransporter } from '../__mocks__/nodemailer.js';
@@ -88,7 +88,7 @@ describe('error.middleware', () => {
       name: 'MailDeliveryError',
       message: 'Failed to send email',
       cause: new Error('SMTP connection failed'),
-      stack: unknown,
+      stack: undefined,
     };
     (extractErrorInfo as Mock).mockReturnValueOnce(mockErrorInfo);
 
@@ -98,6 +98,9 @@ describe('error.middleware', () => {
       mockResponse as Response,
       mockNext,
     );
+
+    mockTransporter.isIdle();
+    mockTransporter.close();
 
     expect(statusSpy).toHaveBeenCalledWith(500);
     expect(jsonSpy).toHaveBeenCalledWith({
@@ -120,7 +123,7 @@ describe('error.middleware', () => {
       name: 'ConnectionVerificationError',
       message: 'Failed to verify connection',
       cause: new Error('Connection timed out'),
-      stack: unknown,
+      stack: undefined,
     };
     (extractErrorInfo as Mock).mockReturnValueOnce(mockErrorInfo);
 
@@ -155,7 +158,7 @@ describe('error.middleware', () => {
       name: 'TransporterCreationError',
       message: 'Failed to create mail transporter',
       cause: new Error('Invalid SMTP configuration'),
-      stack: unknown,
+      stack: undefined,
     };
 
     (extractErrorInfo as Mock).mockReturnValueOnce(mockErrorInfo);
@@ -187,7 +190,7 @@ describe('error.middleware', () => {
       name: 'TemplateCompileError',
       message: 'Failed to compile template: welcome-email',
       cause: new Error('Syntax error in template'),
-      stack: unknown,
+      stack: undefined,
     };
     (extractErrorInfo as Mock).mockReturnValueOnce(mockErrorInfo);
 
@@ -217,7 +220,7 @@ describe('error.middleware', () => {
       name: 'TemplatePreloadError',
       message: 'Failed to preload templates',
       cause: new Error('Failed to read template directory'),
-      stack: unknown,
+      stack: undefined,
     };
     (extractErrorInfo as Mock).mockReturnValueOnce(mockErrorInfo);
 
@@ -244,8 +247,8 @@ describe('error.middleware', () => {
     const mockErrorInfo = {
       name: 'Error',
       message: 'Something went wrong',
-      cause: unknown,
-      stack: unknown,
+      cause: undefined,
+      stack: undefined,
     };
     (extractErrorInfo as Mock).mockReturnValueOnce(mockErrorInfo);
 
