@@ -287,6 +287,39 @@ Content-Type: application/json
 - [`extractErrorInfo(error)`](src/utils/error.util.ts) - Normalized error extraction for consistent logging.
 - [`gracefulShutdown(server, signal)`](src/utils/shutdown.util.ts) - Handles graceful server shutdown.
 
+
+## SMTP Security Configuration
+
+### `SMTP_SECURE` and SSL/TLS
+
+The `SMTP_SECURE` environment variable controls whether the Nodemailer transporter uses a secure connection (SSL/TLS) for SMTP.
+
+- **If `SMTP_SECURE` is set to `true`:**
+  - The transporter will use SSL/TLS (recommended for production).
+  - You **must** set `SMTP_PORT=465` (the standard port for secure SMTP).
+  - Example:
+    ```env
+    SMTP_SECURE=true
+    SMTP_PORT=465
+    ```
+  - The connection will be fully encrypted from the start.
+
+- **If `SMTP_SECURE` is set to `false`:**
+  - The transporter will use STARTTLS (upgrade to TLS after connecting).
+  - You **must** set `SMTP_PORT=587` (the standard port for non-secure/STARTTLS SMTP).
+  - Example:
+    ```env
+    SMTP_SECURE=false
+    SMTP_PORT=587
+    ```
+  - The connection starts unencrypted and is upgraded to TLS if the server supports it.
+
+**Important:**
+- The application enforces these combinations. If you set `SMTP_SECURE=true` but use a port other than 465, or `SMTP_SECURE=false` with a port other than 587, the server will throw a configuration error and fail to start.
+- Always use secure settings in production to protect credentials and email content.
+
+See [`mail.service.ts`](src/services/mail.service.ts) for implementation details.
+
 ## Environment Configuration
 
 - [`required(name)`](src/config/env.ts) - Retrieve required environment variables with validation.
