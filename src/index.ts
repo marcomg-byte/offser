@@ -25,7 +25,14 @@ if (process.platform === 'win32') {
 }
 
 const app = express();
-const { PORT, NODE_ENV, HTTPS_ENABLED, HTTPS_CERT_PATH, HTTPS_KEY_PATH } = env;
+const {
+  PORT,
+  NODE_ENV,
+  HTTPS_ENABLED,
+  HTTPS_CERT_PATH,
+  HTTPS_KEY_PATH,
+  SMTP_SECURE,
+} = env;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -108,6 +115,9 @@ const onServerStart = (): void => {
   verifyMailConnection()
     .then((connection) => {
       if (connection) {
+        logger.info(
+          `${SMTP_SECURE ? '🔐 SSL' : '🔓 Non-SSL'} SMTP Transporter Created Successfully`,
+        );
         logger.info('📧 Mail Service Connected Successfully');
         return;
       }

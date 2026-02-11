@@ -7,6 +7,7 @@ const env = {
   MAIL_FROM: 'mock@example.com',
   SMTP_HOST: 'smtp.mockserver.com',
   SMTP_PORT: 587,
+  SMTP_SECURE: false,
   SMTP_USER: 'mockuser',
   SMTP_PASS: 'mockpass',
 };

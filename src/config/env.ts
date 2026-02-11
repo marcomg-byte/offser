@@ -60,8 +60,10 @@ export const env = {
   PORT: Number(process.env.PORT ?? 3000),
   /** @type {string} SMTP server hostname (e.g., 'smtp.gmail.com'). Required. */
   SMTP_HOST: required('SMTP_HOST'),
-  /** @type {number} SMTP server port (e.g., 587 for TLS, 465 for SSL). Required. */
-  SMTP_PORT: Number(required('SMTP_PORT')),
+  /** @type {number} SMTP server port. Defaults to 587 if SMTP_PORT env var is not set. */
+  SMTP_PORT: Number(process.env.SMTP_PORT ?? 587),
+  /** @type {boolean} Whether to use a secure connection (SSL/TLS) for SMTP. Defaults to false if not set. */
+  SMTP_SECURE: process.env.SMTP_SECURE === 'true',
   /** @type {string} SMTP authentication username (email or account name). Required. */
   SMTP_USER: required('SMTP_USER'),
   /** @type {string} SMTP authentication password. Required. Should be kept secure. */

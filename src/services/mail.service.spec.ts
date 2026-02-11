@@ -23,11 +23,39 @@ describe('mail.service', () => {
   });
 
   describe('createTransporter', () => {
+    let env: {
+      SMTP_PORT: number;
+      SMTP_SECURE: boolean;
+    };
+
+    beforeEach(async () => {
+      const { env: importedEnv } = await import('../config/env.js');
+      env = importedEnv;
+    });
+
     it('should throw TransporterCreationError if createTransport fails', async () => {
       const error = new Error('Transporter creation failed');
       (createTransport as Mock).mockImplementation(() => {
         throw error;
       });
+
+      await expect(import('./mail.service.js')).rejects.toMatchObject({
+        name: 'TransporterCreationError',
+      });
+    });
+
+    it('should throw TransporterCreation error for secure=true and port!==465', async () => {
+      env.SMTP_SECURE = true;
+      env.SMTP_PORT = 587;
+
+      await expect(import('./mail.service.js')).rejects.toMatchObject({
+        name: 'TransporterCreationError',
+      });
+    });
+
+    it('should throw TransporterCreationError for secure=false and port!==567', async () => {
+      env.SMTP_SECURE = false;
+      env.SMTP_PORT = 567;
 
       await expect(import('./mail.service.js')).rejects.toMatchObject({
         name: 'TransporterCreationError',
