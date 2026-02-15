@@ -13,6 +13,7 @@ import { execSync } from 'child_process';
 import https from 'https';
 import http from 'http';
 import fs from 'fs';
+import path from 'path';
 
 /** Sets the console code page to UTF-8 on Windows for proper encoding */
 if (process.platform === 'win32') {
@@ -37,6 +38,7 @@ const {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.text({ type: 'text/*' }));
+app.use('/assets', express.static(path.join(process.cwd(), 'assets')));
 app.use('/health', healthRouter);
 app.use('/mail', mailRouter);
 app.use('/render', templateRouter);
