@@ -2,6 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
 import { logger, extractErrorInfo } from '../utils/index.js';
 import {
+  DBConnectionVerificationError,
+  DBPoolCreationError,
+  DBQueryExecutionError,
   MailDeliveryError,
   ConnectionVerificationError,
   TransporterCreationError,
@@ -100,6 +103,12 @@ function errorHandler(
   if (error instanceof ZodError) {
     title = 'Request Validation Error';
     statusCode = 400;
+  } else if (
+    error instanceof DBConnectionVerificationError ||
+    error instanceof DBPoolCreationError ||
+    error instanceof DBQueryExecutionError
+  ) {
+    title = 'Database Error';
   } else if (
     error instanceof MailDeliveryError ||
     error instanceof ConnectionVerificationError ||

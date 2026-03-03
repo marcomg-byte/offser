@@ -76,6 +76,28 @@ export const env = {
   MAIL_SERVICE_RATE_WINDOW: Number(required('MAIL_SERVICE_RATE_WINDOW')),
   /** @type {string} Node environment mode (e.g., 'development', 'production', 'test'). Required. */
   NODE_ENV: required('NODE_ENV').toUpperCase(),
+  /** @type {string} Database host (e.g., 'localhost' or 'db.example.com'). Required. */
+  DB_HOST: required('DB_HOST'),
+  /** @type {number} Database port (e.g., 3306 for MySQL). Required. */
+  DB_PORT: Number(required('DB_PORT')),
+  /** @type {string} Database username. Required. */
+  DB_USER: required('DB_USER'),
+  /** @type {string} Database password. Required. Should be kept secure. */
+  DB_PASS: required('DB_PASS'),
+  /** @type {string} Database name. Required. */
+  DB_NAME: required('DB_NAME'),
+  /** @type {boolean} Flag to determine pool behavior when no connections are available. Defaults to true if DB_WAIT_FOR_CONNECTIONS env var is not set. */
+  DB_WAIT_FOR_CONNECTIONS: process.env.DB_WAIT_FOR_CONNECTIONS === 'true',
+  /** @type {number} Maximum number of connection requests the pool will queue before returning an error. Defaults to 0 (no limit) if DB_QUEUE_LIMIT env var is not set. */
+  DB_QUEUE_LIMIT: Number(process.env.DB_QUEUE_LIMIT ?? 0),
+  /** @type {number} Maximum number of connections to create at once. Defaults to 10 if DB_CONNECTION_LIMIT env var is not set. */
+  DB_CONNECTION_LIMIT: Number(process.env.DB_CONNECTION_LIMIT ?? 10),
+  /** @type {boolean} Flag to enable MySQL connection keep-alive. Defaults to true if DB_KEEP_ALIVE env var is not set. */
+  DB_KEEP_ALIVE: process.env.DB_KEEP_ALIVE === 'true',
+  /** @type {number} Initial delay in milliseconds before starting keep-alive pings. Defaults to 0 if DB_KEEP_ALIVE_INITIAL_DELAY env var is not set. */
+  DB_KEEP_ALIVE_INITIAL_DELAY: Number(
+    process.env.DB_KEEP_ALIVE_INITIAL_DELAY ?? 0,
+  ),
   /**
    * @type {number} Rate limit for render service requests. Required.
    * Maximum number of render requests allowed per window.

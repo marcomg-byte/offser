@@ -5,11 +5,15 @@ import {
   offersTemplateSchema,
   shipmentTemplateSchema,
 } from './template.schema.js';
+import { dbDeleteSchema, dbInsertSchema, dbReadSchema } from './db.schema.js';
 
 export {
+  dbDeleteSchema,
+  dbInsertSchema,
+  dbReadSchema,
   mailRequestSchema,
+  offersTemplateSchema,
   renderTemplateParamsSchema,
   salesTemplateSchema,
-  offersTemplateSchema,
   shipmentTemplateSchema,
 };
