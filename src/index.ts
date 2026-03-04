@@ -1,8 +1,15 @@
 import 'dotenv/config';
 import express from 'express';
-import { healthRouter, mailRouter, templateRouter } from './routes/index.js';
+import {
+  appRouter,
+  dbRouter,
+  healthRouter,
+  mailRouter,
+  templateRouter,
+} from './routes/index.js';
 import {
   verifyConnection as verifyMailConnection,
+  verifyDBConnection,
   preloadTemplates,
 } from './services/index.js';
 import { errorHandler, notFoundHandler } from './middleware/index.js';
@@ -32,12 +39,15 @@ const {
   HTTPS_CERT_PATH,
   HTTPS_KEY_PATH,
   SMTP_SECURE,
+  DB_SSL_ENABLED,
 } = env;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.text({ type: 'text/*' }));
+app.use('/app', appRouter);
 app.use('/health', healthRouter);
+app.use('/records', dbRouter);
 app.use('/mail', mailRouter);
 app.use('/render', templateRouter);
 app.use(notFoundHandler);
@@ -111,6 +121,25 @@ const onServerStart = (): void => {
   } else {
     logger.info('🛠️  Running in Development Mode');
   }
+
+  verifyDBConnection()
+    .then((connection) => {
+      if (connection) {
+        logger.info(
+          `${DB_SSL_ENABLED ? '🔐 SSL' : '🔓 Non-SSL'} Database Transport Layer Created`,
+        );
+        logger.info('💾 Database Service Connected Successfully');
+        return;
+      }
+
+      logger.error('❌ Failed to Verify Database Connection');
+      process.exit(1);
+    })
+    .catch((error) => {
+      const errorInfo = extractErrorInfo(error);
+      logger.error({ errorInfo }, 'Failed to Verify Database Connection');
+      process.exit(1);
+    });
 
   verifyMailConnection()
     .then((connection) => {

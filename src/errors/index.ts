@@ -9,9 +9,19 @@ import {
   TransporterCreationError,
 } from './mail.error.js';
 import { CertificateNotFoundError } from './server.error.js';
+import {
+  DBConnectionVerificationError,
+  DBPoolCreationError,
+  DBQueryExecutionError,
+  DBSSLConfigError,
+} from './db.error.js';
 
 export {
   CertificateNotFoundError,
+  DBConnectionVerificationError,
+  DBPoolCreationError,
+  DBQueryExecutionError,
+  DBSSLConfigError,
   MailDeliveryError,
   ConnectionVerificationError,
   TransporterCreationError,
