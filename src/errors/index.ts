@@ -13,6 +13,7 @@ import {
   DBConnectionVerificationError,
   DBPoolCreationError,
   DBQueryExecutionError,
+  DBSSLConfigError,
 } from './db.error.js';
 
 export {
@@ -20,6 +21,7 @@ export {
   DBConnectionVerificationError,
   DBPoolCreationError,
   DBQueryExecutionError,
+  DBSSLConfigError,
   MailDeliveryError,
   ConnectionVerificationError,
   TransporterCreationError,

@@ -98,6 +98,17 @@ export const env = {
   DB_KEEP_ALIVE_INITIAL_DELAY: Number(
     process.env.DB_KEEP_ALIVE_INITIAL_DELAY ?? 0,
   ),
+  /** @type {boolean} Flag to enable SSL for database connections. Defaults to false if DB_SSL_ENABLED env var is not set. */
+  DB_SSL_ENABLED: process.env.DB_SSL_ENABLED === 'true',
+  /** @type {string | undefined} Path to the SSL CA file. Optional. */
+  DB_SSL_CA: process.env.DB_SSL_CA || undefined,
+  /** @type {string | undefined} Path to the SSL certificate file. Optional. */
+  DB_SSL_CERT: process.env.DB_SSL_CERT || undefined,
+  /** @type {string | undefined} Path to the SSL key file. Optional. */
+  DB_SSL_KEY: process.env.DB_SSL_KEY || undefined,
+  /** @type {boolean} Flag to reject unauthorized SSL connections. Defaults to true if DB_SSL_REJECT_UNAUTHORIZED env var is not set. */
+  DB_SSL_REJECT_UNAUTHORIZED:
+    process.env.DB_SSL_REJECT_UNAUTHORIZED === 'false',
   /**
    * @type {number} Rate limit for render service requests. Required.
    * Maximum number of render requests allowed per window.

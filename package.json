@@ -8,9 +8,8 @@
   },
   "scripts": {
     "backup:logs": "npx cpy logs/**/*.log backup/logs --parents",
-    "build": "npx tsc && npm run build:templates && npm run build:certs",
+    "build": "npx tsc && npm run build:templates",
     "build:templates": "npx cpy src/templates/**/* dist/templates --parents",
-    "build:certs": "npx cpy src/config/certs/**/* dist/config/certs --parents",
     "clean": "rimraf dist",
     "clean:logs": "rimraf logs",
     "dev": "concurrently \"npm run watch:templates\" \"nodemon --watch src --ext ts --exec tsx src/index.ts\"",

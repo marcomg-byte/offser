@@ -108,8 +108,48 @@ class DBQueryExecutionError extends Error {
   }
 }
 
+/**
+ * Error thrown when there is a problem with the database SSL configuration.
+ *
+ * @class DBSSLConfigError
+ * @extends {Error}
+ * @param {string} caPath - The path to the CA certificate file.
+ * @param {string} certPath - The path to the client certificate file.
+ * @param {string} keyPath - The path to the client key file.
+ * @param {unknown} [cause] - The underlying cause of the error, if any.
+ */
+class DBSSLConfigError extends Error {
+  /** The path to the CA certificate file. */
+  public caPath: string;
+  /** The path to the client certificate file. */
+  public certPath: string;
+  /** The path to the client key file. */
+  public keyPath: string;
+
+  /**
+   * Creates an instance of DBSSLConfigError.
+   * @param {string} caPath - The path to the CA certificate file.
+   * @param {string} certPath - The path to the client certificate file.
+   * @param {string} keyPath - The path to the client key file.
+   * @param {unknown} [cause] - The underlying cause of the error, if any.
+   */
+  constructor(
+    caPath: string,
+    certPath: string,
+    keyPath: string,
+    cause?: unknown,
+  ) {
+    super('Database SSL Configuration Error', { cause });
+    this.name = 'DBSSLConfigError';
+    this.caPath = caPath;
+    this.certPath = certPath;
+    this.keyPath = keyPath;
+  }
+}
+
 export {
   DBConnectionVerificationError,
   DBPoolCreationError,
   DBQueryExecutionError,
+  DBSSLConfigError,
 };

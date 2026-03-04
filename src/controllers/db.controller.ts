@@ -9,8 +9,9 @@ import {
 import { pool, verifyDBConnection } from '../services/index.js';
 
 interface Record extends RowDataPacket {
-  mail: string;
-  password: string;
+  ID: string;
+  MAIL: string;
+  PASSWORD: string;
 }
 
 const insertDataHandler = async (
@@ -45,7 +46,7 @@ const readDataHandler = async (
   try {
     const { lowerLimit, upperLimit } = dbReadSchema.parse(req.body);
     await connection.beginTransaction();
-    const [records] = await connection.query<Record[]>(
+    const [records] = await connection.query<Record[][]>(
       'CALL READ_PASSWORDS (?, ?)',
       [upperLimit, lowerLimit ?? null],
     );

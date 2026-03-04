@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import {
+  appRouter,
   dbRouter,
   healthRouter,
   mailRouter,
@@ -38,11 +39,13 @@ const {
   HTTPS_CERT_PATH,
   HTTPS_KEY_PATH,
   SMTP_SECURE,
+  DB_SSL_ENABLED,
 } = env;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.text({ type: 'text/*' }));
+app.use('/app', appRouter);
 app.use('/health', healthRouter);
 app.use('/records', dbRouter);
 app.use('/mail', mailRouter);
@@ -122,6 +125,9 @@ const onServerStart = (): void => {
   verifyDBConnection()
     .then((connection) => {
       if (connection) {
+        logger.info(
+          `${DB_SSL_ENABLED ? '🔐 SSL' : '🔓 Non-SSL'} Database Transport Layer Created`,
+        );
         logger.info('💾 Database Service Connected Successfully');
         return;
       }
