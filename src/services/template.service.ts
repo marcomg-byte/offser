@@ -14,6 +14,55 @@ const templateCache = new Map<string, handlebars.TemplateDelegate>();
 const shouldCache = env.NODE_ENV === 'PRODUCTION';
 
 /**
+ * Represents a single password record for export or template rendering.
+ * @interface PasswordRecord
+ *
+ * @property id - Unique identifier for the password record.
+ * @property mail - Email address associated with the password.
+ * @property password - The password value.
+ */
+interface PasswordRecord {
+  id: number;
+  mail: string;
+  password: string;
+}
+
+/**
+ * @function registerHelpers
+ * Registers custom Handlebars helpers for template rendering.
+ *
+ * Currently registers the 'toCSV' helper, which converts an array of PasswordRecord objects
+ * into a CSV-formatted string. The CSV includes headers (ID, MAIL, PASSWORD) and each record as a row.
+ *
+ * Example usage in a Handlebars template:
+ *   {{toCSV passwords}}
+ *
+ * @private
+ */
+function registerHelpers(): void {
+  handlebars.registerHelper('toCSV', function (passwords: PasswordRecord[]) {
+    if (!passwords || passwords.length === 0) return '';
+
+    const headers =
+      Object.keys(passwords[0])
+        .map((key) => `"${key.toUpperCase()}"`)
+        .join(',') + '\n';
+
+    const rows = passwords
+      .map((record) => `"${record.id}", "${record.mail}", "${record.password}"`)
+      .join('\n');
+
+    return headers + rows;
+  });
+}
+
+/**
+ * Immediately register all custom Handlebars helpers on module load.
+ * Ensures helpers are available before any template compilation occurs.
+ */
+registerHelpers();
+
+/**
  * Compiles and renders a Handlebars template with the provided data.
  *
  * In production environments (NODE_ENV === 'production'), uses an in-memory cache to avoid

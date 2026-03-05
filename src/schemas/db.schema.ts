@@ -57,7 +57,8 @@ const dbReadSchema = zod.object({
  * });
  */
 const dbDeleteSchema = zod.object({
-  id: zod.number().int().positive().min(1),
+  lowerLimit: zod.number().int().positive().min(1),
+  upperLimit: zod.number().int().positive().min(1).optional(),
 });
 
 export { dbInsertSchema, dbReadSchema, dbDeleteSchema };
