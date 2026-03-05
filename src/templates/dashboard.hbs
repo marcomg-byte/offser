@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="/assets/matrix.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matrix Dashboard</title>
+    <title>Offser</title>
     <style>
         * {
             margin: 0;
@@ -74,6 +75,10 @@
         }
 
         .header .subtitle {
+            display: flex;
+            flex-flow: row nowrap;
+            align-items: center;
+            justify-content: space-evenly;
             font-size: 1rem;
             color: #00cc33;
             letter-spacing: 2px;
@@ -223,6 +228,41 @@
                 padding: 15px;
             }
         }
+
+        .export-btn {
+            background: #00ff41;
+            color: #0d0208;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-family: 'Courier New', Consolas, monospace;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.6);
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        }
+
+        .export-btn:hover {
+            background: #33ff77;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.9);
+            transform: scale(1.05);
+        }
+
+        .export-btn:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+            /* ...existing code... */
+            
+            .export-btn {
+                padding: 12px 25px;
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -230,7 +270,28 @@
     
     <div class="header">
         <h1>◈ PASSWORDS DASHBOARD ◈</h1>
-        <div class="subtitle">ACCESS GRANTED // SYSTEM ONLINE</div>
+        <div class="subtitle">
+            ACCESS GRANTED // SYSTEM ONLINE
+            {{#if data}}
+                <button class="export-btn" onclick="exportRecords()">Export CSV</button>
+
+                <script>
+                    function exportRecords() {
+                        const csvData = `{{{toCSV data}}}`;
+                        const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+                        const link = document.createElement('a');
+                        const url = URL.createObjectURL(blob);
+
+                        link.setAttribute('href', url);
+                        link.setAttribute('download', 'password_records.csv');
+                        link.style.visibility = 'hidden';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                </script>
+            {{/if}}
+        </div>
     </div>
 
     <div class="dashboard-container">

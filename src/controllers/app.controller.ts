@@ -18,7 +18,9 @@ const renderDashboardHandler = async (
   const connection = await pool.getConnection();
   try {
     const data = dbReadSchema.parse({
-      lowerLimit: Number(req.query.lowerLimit),
+      lowerLimit: req.query.lowerLimit
+        ? Number(req.query.lowerLimit)
+        : undefined,
       upperLimit: Number(req.query.upperLimit),
     });
     const { lowerLimit, upperLimit } = data;

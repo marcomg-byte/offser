@@ -72,12 +72,25 @@ const deleteDataHandler = async (
 ) => {
   const connection = await pool.getConnection();
   try {
-    const { id } = dbDeleteSchema.parse(req.body);
+    const { lowerLimit, upperLimit } = dbDeleteSchema.parse(req.body);
     await connection.beginTransaction();
-    await connection.query('CALL DELETE_ENTRY (?)', [id]);
+    await connection.query('CALL DELETE_ENTRY (?, ?)', [
+      lowerLimit,
+      upperLimit ?? null,
+    ]);
     await connection.commit();
-    logger.info(`📊 Data deleted successfully for ID: ${id}`);
-    return res.status(200).json({ title: 'Data Deleted Successfully!', id });
+
+    if (lowerLimit && upperLimit) {
+      logger.info(
+        `📊 Data deleted successfully between IDs ${lowerLimit} and ${upperLimit}`,
+      );
+    } else if (lowerLimit) {
+      logger.info(`📊 Data deleted successfully for ID: ${lowerLimit}`);
+    }
+
+    return res
+      .status(200)
+      .json({ title: 'Data Deleted Successfully!', lowerLimit, upperLimit });
   } catch (error: unknown) {
     await connection.rollback();
     return next(error);
