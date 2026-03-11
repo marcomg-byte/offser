@@ -84,6 +84,39 @@
             letter-spacing: 2px;
         }
 
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #00ff41;
+            border-radius: 25px;
+            padding: 6px 16px;
+            margin-left: 24px;
+            margin-right: 24px;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+            transition: border 0.2s;
+        }
+        .search-bar:focus-within {
+            border-color: #33ff77;
+        }
+        .search-bar input[type="text"] {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #00ff41;
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 1rem;
+            width: 160px;
+            padding: 6px 8px 6px 0;
+        }
+        .search-bar .search-icon {
+            font-size: 1.2rem;
+            margin-left: 8px;
+            color: #00ff41;
+            pointer-events: none;
+            user-select: none;
+        }
+
         .dashboard-container {
             width: 100%;
             max-width: 1200px;
@@ -272,9 +305,12 @@
         <h1>◈ PASSWORDS DASHBOARD ◈</h1>
         <div class="subtitle">
             ACCESS GRANTED // SYSTEM ONLINE
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search..." oninput="filterRecords()" />
+                <span class="search-icon">🔍</span>
+            </div>
             {{#if data}}
                 <button class="export-btn" onclick="exportRecords()">Export CSV</button>
-
                 <script>
                     function exportRecords() {
                         const csvData = `{{{toCSV data}}}`;
@@ -322,5 +358,17 @@
             {{/if}}
         </div>
     </div>
+
+    <script>
+        function filterRecords() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const items = document.querySelectorAll('.data-item');
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(filter) ? '' : 'none';
+            });
+        }
+    </script>
 </body>
 </html>
