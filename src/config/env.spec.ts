@@ -24,6 +24,11 @@ describe('env.ts', () => {
       process.env.NODE_ENV = 'test';
       process.env.RENDER_SERVICE_RATE_LIMIT = '50';
       process.env.RENDER_SERVICE_RATE_WINDOW = '10';
+      process.env.DB_HOST = 'localhost';
+      process.env.DB_PORT = '3306';
+      process.env.DB_USER = 'dbuser';
+      process.env.DB_PASS = 'dbpassword';
+      process.env.DB_NAME = 'testdb';
 
       const { env } = await import('./env.js');
       expect(env.SMTP_HOST).toBe('smtp.test.com');
@@ -36,6 +41,11 @@ describe('env.ts', () => {
       expect(env.NODE_ENV).toBe('TEST');
       expect(env.RENDER_SERVICE_RATE_LIMIT).toBe(50);
       expect(env.RENDER_SERVICE_RATE_WINDOW).toBe(10);
+      expect(env.DB_HOST).toBe('localhost');
+      expect(env.DB_PORT).toBe(3306);
+      expect(env.DB_USER).toBe('dbuser');
+      expect(env.DB_PASS).toBe('dbpassword');
+      expect(env.DB_NAME).toBe('testdb');
     });
 
     it('should throw an error if the environment variable is missing', async () => {
@@ -86,6 +96,11 @@ describe('env.ts', () => {
       process.env.HTTPS_ENABLED = 'true';
       process.env.HTTPS_KEY_PATH = '/path/to/key.pem';
       process.env.HTTPS_CERT_PATH = '/path/to/cert.pem';
+      process.env.DB_HOST = 'localhost';
+      process.env.DB_PORT = '3306';
+      process.env.DB_USER = 'dbuser';
+      process.env.DB_PASS = 'dbpassword';
+      process.env.DB_NAME = 'testdb';
 
       const { env } = await import('./env.js');
 
@@ -103,6 +118,11 @@ describe('env.ts', () => {
       expect(env.HTTPS_ENABLED).toBe(true);
       expect(env.HTTPS_KEY_PATH).toBe('/path/to/key.pem');
       expect(env.HTTPS_CERT_PATH).toBe('/path/to/cert.pem');
+      expect(env.DB_HOST).toBe('localhost');
+      expect(env.DB_PORT).toBe(3306);
+      expect(env.DB_USER).toBe('dbuser');
+      expect(env.DB_PASS).toBe('dbpassword');
+      expect(env.DB_NAME).toBe('testdb');
     });
 
     it('should use default values for optional variables when they are not set', async () => {
@@ -116,6 +136,11 @@ describe('env.ts', () => {
       process.env.NODE_ENV = 'development';
       process.env.RENDER_SERVICE_RATE_LIMIT = '50';
       process.env.RENDER_SERVICE_RATE_WINDOW = '10';
+      process.env.DB_HOST = 'localhost';
+      process.env.DB_PORT = '3306';
+      process.env.DB_USER = 'dbuser';
+      process.env.DB_PASS = 'dbpassword';
+      process.env.DB_NAME = 'testdb';
 
       const { env } = await import('./env.js');
 
