@@ -10,6 +10,11 @@ const env = {
   SMTP_SECURE: false,
   SMTP_USER: 'mockuser',
   SMTP_PASS: 'mockpass',
+  DB_HOST: 'localhost',
+  DB_PORT: 3306,
+  DB_USER: 'mockdbuser',
+  DB_PASS: 'mockdbpass',
+  DB_NAME: 'mockdb',
 };
 
 export { env };
