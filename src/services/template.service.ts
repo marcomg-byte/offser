@@ -44,7 +44,8 @@ function registerHelpers(): void {
     if (!passwords || passwords.length === 0) return '';
 
     const headers =
-      Object.keys(passwords[0])
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      Object.keys(passwords[0] as PasswordRecord)
         .map((key) => `"${key.toUpperCase()}"`)
         .join(',') + '\n';
 
@@ -177,3 +178,4 @@ function preloadTemplates(): number {
 }
 
 export { compileTemplate, clearTemplateCache, preloadTemplates };
+export type { PasswordRecord };

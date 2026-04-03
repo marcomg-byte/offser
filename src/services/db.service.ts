@@ -41,9 +41,9 @@ function createPool(): Pool {
 
   if (DB_SSL_ENABLED && !isValidSSLConfig) {
     throw new DBSSLConfigError(
-      DB_SSL_CA,
-      DB_SSL_CERT,
-      DB_SSL_KEY,
+      DB_SSL_CA ?? '',
+      DB_SSL_CERT ?? '',
+      DB_SSL_KEY ?? '',
       new Error('Incomplete SSL configuration for database connection'),
     );
   }

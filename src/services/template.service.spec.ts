@@ -6,6 +6,7 @@ import {
   TemplateCompileError as TemplateCompileErrorClass,
   TemplatePreloadError as TemplatePreloadErrorClass,
 } from '../errors/index.js';
+import type { PasswordRecord } from './template.service.js';
 
 vi.mock('fs');
 vi.mock('../config/env.js');
@@ -280,6 +281,50 @@ describe('template.service', () => {
 
       expect(readdirSync).toHaveBeenCalledWith(templatesDir);
       expect(readdirSync).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('registerHelpers', () => {
+    let toCsv: (passwords: PasswordRecord[] | null) => string;
+
+    beforeEach(async () => {
+      vi.doMock('../config/env.js', () => ({
+        env: { NODE_ENV: 'DEVELOPMENT' },
+      }));
+      await import('./index.js');
+      const { default: handlebars } = await import('handlebars');
+      toCsv = (handlebars.helpers as Record<string, (p: unknown) => string>)[
+        'toCSV'
+      ];
+    });
+
+    it('should return empty string when passwords is null', () => {
+      expect(toCsv(null)).toBe('');
+    });
+
+    it('should return empty string when passwords is an empty array', () => {
+      expect(toCsv([])).toBe('');
+    });
+
+    it('should return CSV with headers and a single row', () => {
+      const passwords: PasswordRecord[] = [
+        { id: 1, mail: 'test@example.com', password: 'pass1' },
+      ];
+      const result = toCsv(passwords);
+      expect(result).toBe(
+        '"ID","MAIL","PASSWORD"\n"1", "test@example.com", "pass1"',
+      );
+    });
+
+    it('should return CSV with headers and multiple rows', () => {
+      const passwords: PasswordRecord[] = [
+        { id: 1, mail: 'a@example.com', password: 'pass1' },
+        { id: 2, mail: 'b@example.com', password: 'pass2' },
+      ];
+      const result = toCsv(passwords);
+      expect(result).toBe(
+        '"ID","MAIL","PASSWORD"\n"1", "a@example.com", "pass1"\n"2", "b@example.com", "pass2"',
+      );
     });
   });
 });

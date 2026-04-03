@@ -2,15 +2,18 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import type { Mock } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
 import { z as zod } from 'zod';
+import type { PoolConnection } from 'mysql2/promise';
 import { errorHandler } from './error.middleware.js';
 import { logger, extractErrorInfo } from '../utils/index.js';
 import { createMockTransporter } from '../__mocks__/nodemailer.js';
 import {
+  DBPoolCreationError,
   ConnectionVerificationError,
   MailDeliveryError,
   TransporterCreationError,
   TemplateCompileError,
   TemplatePreloadError,
+  DBQueryExecutionError,
 } from '../errors/index.js';
 import { env } from '../config/env.js';
 
@@ -240,6 +243,68 @@ describe('error.middleware', () => {
       { errorInfo: mockErrorInfo },
       'Template Compilation Error',
     );
+  });
+
+  it('should handle DBPoolCreationError with a 500 status code', () => {
+    const { DB_HOST, DB_PORT, DB_USER, DB_NAME } = env;
+    const dbError = new DBPoolCreationError(
+      DB_HOST,
+      DB_PORT,
+      DB_USER,
+      DB_NAME,
+      new Error('Invalid DB credentials'),
+    );
+    const mockErrorInfo = {
+      name: 'DBPoolCreationError',
+      message: 'Database Pool Creation Error',
+      cause: new Error('Invalid DB credentials'),
+      stack: undefined,
+    };
+    (extractErrorInfo as Mock).mockReturnValue(mockErrorInfo);
+
+    errorHandler(
+      dbError,
+      mockRequest as Request,
+      mockResponse as Response,
+      mockNext,
+    );
+
+    expect(statusSpy).toHaveBeenCalledWith(500);
+    expect(jsonSpy).toHaveBeenCalledWith({
+      title: 'Database Error',
+      ...mockErrorInfo,
+    });
+  });
+
+  it('should handle DBQueryExecutionError with a 500 status code', () => {
+    const cause = new Error('Syntax error in SQL query');
+    const dbError = new DBQueryExecutionError(
+      'SELECT 1',
+      {},
+      {} as PoolConnection,
+      cause,
+    );
+    const mockErrorInfo = {
+      name: 'DBQueryExecutionError',
+      message: 'Database Query Execution Error',
+      cause,
+      stack: undefined,
+    };
+
+    (extractErrorInfo as Mock).mockReturnValueOnce(mockErrorInfo);
+
+    errorHandler(
+      dbError,
+      mockRequest as Request,
+      mockResponse as Response,
+      mockNext,
+    );
+
+    expect(statusSpy).toHaveBeenCalledWith(500);
+    expect(jsonSpy).toHaveBeenCalledWith({
+      title: 'Database Error',
+      ...mockErrorInfo,
+    });
   });
 
   it('should handle a generic Error with a 500 status code', () => {
