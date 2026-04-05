@@ -132,6 +132,44 @@ A TypeScript-based Express.js server for sending emails via SMTP, rendering temp
 - **MySQL database** (v8.0+ recommended)
 - **(Optional) SSL/TLS certificates for HTTPS server and secure MySQL connections**
 
+## Docker Usage
+
+You can build and run Offser in a Docker container for easy deployment.
+
+### Build the Docker Image
+
+From the project root, run:
+
+```sh
+docker build -t offser .
+```
+
+### Run the Container
+
+```sh
+docker run --env-file .env -p 8080:8080 -v $(pwd)/certs:/app/certs offser
+```
+
+- `--env-file .env` loads environment variables (see `.env.example` for required values)
+- `-p 8080:8080` maps the container port to your host
+- `-v $(pwd)/certs:/app/certs` mounts your local `certs` directory for SSL/DB certificates
+
+#### Database Host for Docker
+
+If your MySQL database is running on your host machine (not in Docker), set in your `.env`:
+
+```env
+DB_HOST=host.docker.internal
+```
+
+This allows the container to connect to your host's MySQL instance. If your database is in another container, use the Docker network service name.
+
+#### .dockerignore
+
+The build uses a multi-stage Dockerfile and a `.dockerignore` file to exclude unnecessary files (e.g., `node_modules`, `logs`, `dist`, local `.env`).
+
+For more details, see the Dockerfile and `.dockerignore` in the project root.
+
 ### Installation
 
 1. **Clone the repository**
