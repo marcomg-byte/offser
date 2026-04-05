@@ -3,6 +3,7 @@ node_modules
 
 # Ignore environment variable files
 .env
+.env.container
 
 # Ignore build and log directories
 dist
