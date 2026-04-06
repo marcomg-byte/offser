@@ -39,97 +39,120 @@ The author(s) assume **no liability** for any misuse, damage, or illegal activit
 
 ```
 .
-├── assets/                      # Static assets (icons, images)
-│   └── matrix.ico               # Matrix theme favicon
-├── backup/                      # Backup directory for logs
-│   └── logs/                    # Archived log files
-├── certs/                       # SSL/TLS certificates directory
-│   ├── db/                      # Database SSL certificates
-│   ├── server/                  # HTTPS server certificates
-│   └── README.md                # Certificate management guide
-├── db/                          # Database scripts and documentation
-│   ├── offser_passwords.sql     # Password table creation script
-│   ├── offser_routines.sql      # Stored procedures
-│   └── README.md                # Database setup instructions
-├── logs/                        # Application log files (auto-generated)
-│   ├── error.log                # Error-level logs
-│   ├── info.log                 # Info-level logs
-│   ├── warn.log                 # Warning-level logs
-│   └── debug.log                # Debug-level logs
+├── assets/
+│   └── matrix.ico
+├── backup/
+│   └── logs/                # (if present at runtime)
+├── certs/
+│   ├── db/
+│   │   ├── ca-cert.pem
+│   │   ├── client-cert.pem
+│   │   └── client-key.pem
+│   ├── server/
+│   │   ├── cert.pem
+│   │   └── key.pem
+│   └── README.md
+├── db/
+│   ├── offser_passwords.sql
+│   ├── offser_routines.sql
+│   └── README.md
 ├── src/
-│   ├── index.ts                 # Application entry point with startup logic
-│   ├── __mocks__/               # Mock implementations for testing
+│   ├── __mocks__/
 │   │   ├── index.ts
-│   │   ├── nodemailer.ts        # Nodemailer mock for tests
-│   │   └── server.ts            # Server mock for tests
+│   │   ├── nodemailer.ts
+│   │   └── server.ts
 │   ├── config/
-│   │   ├── env.ts               # Environment variables configuration & validation
-│   │   ├── env.spec.ts          # Environment configuration tests
-│   │   └── __mocks__/           # Config mocks for testing
+│   │   ├── __mocks__/
+│   │   │   └── env.ts
+│   │   ├── env.spec.ts
+│   │   └── env.ts
 │   ├── controllers/
-│   │   ├── app.controller.ts    # Dashboard rendering handler
-│   │   ├── db.controller.ts     # Database operation handlers
+│   │   ├── app.controller.ts
+│   │   ├── db.controller.ts
 │   │   ├── index.ts
-│   │   ├── mail.controller.ts   # Email request handler
-│   │   ├── mail.controller.spec.ts # Mail controller tests
-│   │   └── template.controller.ts # Template rendering handler
+│   │   ├── mail.controller.spec.ts
+│   │   ├── mail.controller.ts
+│   │   ├── template.controller.spec.ts
+│   │   └── template.controller.ts
 │   ├── errors/
-│   │   ├── db.error.ts          # Database-specific errors
+│   │   ├── db.error.ts
 │   │   ├── index.ts
-│   │   ├── mail.error.ts        # Mail service errors
-│   │   ├── ssl.error.ts         # SSL/TLS certificate errors
-│   │   ├── template.error.ts    # Template rendering errors
-│   │   └── types/               # Error info types
+│   │   ├── mail.error.ts
+│   │   ├── server.error.ts
+│   │   ├── template.error.ts
+│   │   └── types/
+│   │       ├── error.ts
+│   │       └── index.ts
+│   ├── index.ts
 │   ├── middleware/
-│   │   ├── error.middleware.ts  # Centralized error handling
+│   │   ├── error.middleware.spec.ts
+│   │   ├── error.middleware.ts
 │   │   ├── index.ts
-│   │   └── not-found.middleware.ts # 404 handler with Matrix-themed page
+│   │   ├── not-found.middleware.spec.ts
+│   │   └── not-found.middleware.ts
 │   ├── routes/
-│   │   ├── app.routes.ts        # Application dashboard routes
-│   │   ├── db.routes.ts         # Database API routes
-│   │   ├── health.routes.ts     # Health check endpoint
-│   │   ├── health.routes.spec.ts # Health check tests
+│   │   ├── app.routes.ts
+│   │   ├── db.routes.ts
+│   │   ├── health.routes.spec.ts
+│   │   ├── health.routes.ts
 │   │   ├── index.ts
-│   │   ├── mail.routes.ts       # Email API routes with rate limiting
-│   │   └── template.routes.ts   # Template rendering API routes
+│   │   ├── mail.routes.ts
+│   │   └── template.routes.ts
 │   ├── schemas/
-│   │   ├── app.schema.ts        # Dashboard data validation
-│   │   ├── db.schema.ts         # Database operation validation schemas
+│   │   ├── __mocks__/
+│   │   │   └── index.ts
+│   │   ├── app.schema.ts
+│   │   ├── db.schema.ts
 │   │   ├── index.ts
-│   │   ├── mail.schema.ts       # Email validation schema (Zod)
-│   │   └── template.schema.ts   # Template data validation schemas (Zod)
+│   │   ├── mail.schema.spec.ts
+│   │   ├── mail.schema.ts
+│   │   ├── template.schema.spec.ts
+│   │   └── template.schema.ts
 │   ├── services/
-│   │   ├── db.service.ts        # MySQL connection pool & query service
+│   │   ├── __mocks__/
+│   │   │   └── index.ts
+│   │   ├── db.service.spec.ts
+│   │   ├── db.service.ts
 │   │   ├── index.ts
-│   │   ├── mail.service.ts      # Email sending service (Nodemailer)
-│   │   ├── mail.service.spec.ts # Mail service tests
-│   │   ├── template.service.ts  # Template rendering & caching
-│   │   ├── template.service.spec.ts # Template service tests
-│   │   └── __mocks__/           # Service mocks for testing
-│   ├── templates/               # Handlebars templates
-│   │   ├── dashboard.hbs        # Matrix-themed password dashboard with CSV export
-│   │   ├── not-found.hbs        # Matrix-themed 404 page with animation
-│   │   ├── offers.hbs           # Promotional offers email template
-│   │   ├── sales.hbs            # Sales email template with product listings
-│   │   └── shipment.hbs         # Order shipment confirmation template
+│   │   ├── mail.service.spec.ts
+│   │   ├── mail.service.ts
+│   │   ├── template.service.spec.ts
+│   │   └── template.service.ts
+│   ├── templates/
+│   │   ├── dashboard.hbs
+│   │   ├── not-found.hbs
+│   │   ├── offers.hbs
+│   │   ├── sales.hbs
+│   │   └── shipment.hbs
 │   └── utils/
-│       ├── error.util.ts        # Error extraction utilities
-│       ├── error.util.spec.ts   # Error utility tests
-│       ├── format.util.ts       # String formatting utilities (capitalize, date)
-│       ├── format.util.spec.ts  # Format utility tests
+│       ├── __mocks__/
+│       │   └── (if present)
+│       ├── error.util.spec.ts
+│       ├── error.util.ts
+│       ├── format.util.spec.ts
+│       ├── format.util.ts
 │       ├── index.ts
-│       ├── logger.util.ts       # Pino logger with multistream configuration
-│       └── shutdown.util.ts     # Graceful shutdown handler for SIGTERM/SIGINT
-├── .env                         # Environment variables (local, git-ignored)
-├── .env.example                 # Example environment configuration
-├── .gitignore                   # Git ignore rules
-├── .prettierrc                  # Prettier code formatting config
-├── eslint.config.js             # ESLint configuration with TypeScript support
-├── package.json                 # Project dependencies & scripts
-├── tsconfig.json                # TypeScript configuration
-├── tsconfig.test.json           # TypeScript test configuration
-├── vitest.config.ts             # Vitest test configuration
-└── README.md                    # Project documentation
+│       ├── logger.util.spec.ts
+│       ├── logger.util.ts
+│       ├── shutdown.util.spec.ts
+│       └── shutdown.util.ts
+├── .dockerignore
+├── .env
+├── .env.container
+├── .env.example
+├── .gitignore
+├── .prettierrc
+├── Dockerfile
+├── LICENSE
+├── README.md
+├── esbuild.cli.mjs
+├── esbuild.container.mjs
+├── eslint.config.js
+├── package.json
+├── package-lock.json
+├── tsconfig.json
+├── tsconfig.test.json
+├── vitest.config.ts
 ```
 
 ## Getting Started
