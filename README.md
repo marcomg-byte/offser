@@ -25,6 +25,16 @@ A TypeScript-based Express.js server for sending emails via SMTP, rendering temp
 - **Graceful shutdown handling with signal interception**
 - **Matrix-themed UI components (dashboard and 404 page)**
 
+## Legal Disclaimer
+
+This tool is intended **exclusively for authorized penetration testing, red team operations, and security research** on systems you own or have explicit written permission to test.
+
+Unauthorized use of this tool against systems without prior consent is illegal and may violate computer crime laws including but not limited to the Computer Fraud and Abuse Act (CFAA), the UK Computer Misuse Act, and equivalent legislation in your jurisdiction.
+
+The author(s) assume **no liability** for any misuse, damage, or illegal activity conducted with this tool. By using this software, you agree that you are solely responsible for compliance with all applicable local, state, national, and international laws.
+
+**Use responsibly and ethically.**
+
 ## Project Structure
 
 ```
