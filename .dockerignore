@@ -1,0 +1,14 @@
+node_modules
+dist
+bundle
+cli
+coverage
+logs
+backup
+certs
+.env
+.git
+.gitignore
+*.spec.ts
+*.test.ts
+README.md

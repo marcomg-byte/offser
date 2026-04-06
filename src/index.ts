@@ -110,6 +110,9 @@ const createHttpsServer = (): https.Server => {
  */
 const onServerStart = (): void => {
   logger.info(`🚀 Server is Running on Port ${PORT}`);
+  logger.warn(
+    'This tool is for authorized security testing only. Unauthorized use is illegal.',
+  );
 
   if (HTTPS_ENABLED) {
     logger.info('🔐 Using HTTPS');
