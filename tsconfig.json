@@ -8,9 +8,10 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "target": "es2022",
+    "target": "esnext",
     "moduleResolution": "nodenext",
-    "lib": ["ES2022"],
+    "lib": ["ESNext"],
+    "removeComments": true,
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,

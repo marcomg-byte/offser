@@ -4,25 +4,34 @@
   "description": "",
   "main": "dist/index.js",
   "bin": {
-    "offser": "dist/index.js"
+    "offser": "cli/index.js"
   },
+  "files": [
+    "cli/"
+  ],
   "scripts": {
     "backup:logs": "npx cpy logs/**/*.log backup/logs --parents",
-    "build": "npx tsc && npm run build:templates",
-    "build:templates": "npx cpy src/templates/**/* dist/templates --parents",
-    "clean": "rimraf dist",
+    "build": "npx tsc && npm run templates:dist",
+    "build:container": "docker build -f Dockerfile -t offser:latest .",
+    "templates:dist": "npx cpy src/templates/**/* dist/templates --parents",
+    "templates:bundle": "npx cpy src/templates/**/* bundle/templates --parents",
+    "templates:cli": "npx cpy src/templates/**/* cli/templates --parents",
+    "bundle:container": "node esbuild.container.mjs && npm run templates:bundle",
+    "bundle:cli": "node esbuild.cli.mjs && npm run templates:cli",
+    "clean": "rimraf dist bundle cli coverage",
     "clean:logs": "rimraf logs",
     "dev": "concurrently \"npm run watch:templates\" \"nodemon --watch src --ext ts --exec tsx src/index.ts\"",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "prepare": "npm run clean && npm run build",
     "start": "node dist/index.js",
+    "start:container": "docker run --env-file .env.container -p 8080:8080 -v $(pwd)/certs:/app/certs offser",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "test:clean": "rimraf coverage",
-    "watch:templates": "nodemon --watch src/templates --ext hbs --exec \"npm run build:templates\""
+    "watch:templates": "nodemon --watch src/templates --ext hbs --exec \"npm run templates:dist\""
   },
   "keywords": [],
   "author": "",
@@ -50,6 +59,7 @@
     "@types/supertest": "^6.0.3",
     "@vitest/coverage-v8": "^4.0.18",
     "cpy-cli": "^6.0.0",
+    "esbuild": "^0.28.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",

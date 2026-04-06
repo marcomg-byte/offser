@@ -3,9 +3,12 @@ node_modules
 
 # Ignore environment variable files
 .env
+.env.*
 
 # Ignore build and log directories
 dist
+bundle
+cli
 logs
 backup
 coverage
