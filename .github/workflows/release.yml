@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get PR labels
+        id: labels
+        uses: actions-ecosystem/action-get-labels@v1
+
+      - name: Set release type
+        id: set_release_type
+        run: |
+          if echo "${{ steps.labels.outputs.labels }}" | grep -q "major"; then
+            echo "type=major" >> $GITHUB_OUTPUT
+          elif echo "${{ steps.labels.outputs.labels }}" | grep -q "minor"; then
+            echo "type=minor" >> $GITHUB_OUTPUT
+          elif echo "${{ steps.labels.outputs.labels }}" | grep -q "patch"; then
+            echo "type=patch" >> $GITHUB_OUTPUT
+          else
+            echo "type=none" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Exit if no release label
+        if: steps.set_release_type.outputs.type == 'none'
+        run: exit 0
+
+      - name: Bump version and tag
+        uses: phips28/gh-action-bump-version@v11.0.2
+        with:
+          tag-prefix: "v"
+          version-type: ${{ steps.set_release_type.outputs.type }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.bump-version.outputs.newTag }}
