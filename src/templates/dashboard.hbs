@@ -168,6 +168,33 @@
             overflow: hidden;
         }
 
+        .delete-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: rgba(13,2,8,0.95);
+            color: #00ff41;
+            border: 2px solid #00ff41;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 12px #00ff41, 0 0 4px #00ff41 inset;
+            transition: background 0.2s, color 0.2s, border 0.2s, box-shadow 0.2s;
+            z-index: 2;
+            outline: none;
+            text-shadow: 0 0 6px #00ff41, 0 0 2px #00ff41;
+        }
+        .delete-btn:hover, .delete-btn:focus {
+            background: #001a00;
+            color: #0d0208;
+            border-color: #33ff77;
+            box-shadow: 0 0 24px #33ff77, 0 0 8px #33ff77 inset;
+        }
+        }
+
         .data-item::before {
             content: '';
             position: absolute;
@@ -300,7 +327,11 @@
 </head>
 <body>
     <div class="matrix-bg"></div>
-    
+    <div id="matrix-snackbar" style="display:none;min-width:260px;max-width:90vw;background:#001a00;color:#00ff41;text-align:center;border-radius:8px;padding:16px 24px;position:fixed;left:50%;bottom:40px;transform:translateX(-50%);font-size:1.05rem;box-shadow:0 2px 18px #00ff41a0;z-index:9999;opacity:0;transition:opacity 0.3s, bottom 0.3s;letter-spacing:0.01em;border:2px solid #00ff41;text-shadow:0 0 8px #00ff41;">
+        <span id="matrix-snackbar-message">Error</span>
+        <button id="matrix-snackbar-confirm" style="display:none;margin-left:18px;background:#00ff41;color:#001a00;border:none;border-radius:5px;padding:6px 18px;font-weight:bold;cursor:pointer;box-shadow:0 0 8px #00ff41;transition:background 0.2s;">Confirm</button>
+        <button id="matrix-snackbar-close" style="display:none;background:transparent;border:none;color:#00ff41;font-size:1.2rem;position:absolute;top:8px;right:14px;cursor:pointer;line-height:1;text-shadow:0 0 8px #00ff41;">&times;</button>
+    </div>
     <div class="header">
         <h1>◈ PASSWORDS DASHBOARD ◈</h1>
         <div class="subtitle">
@@ -334,7 +365,8 @@
         <div class="data-grid">
             {{#if data}}
                 {{#each data}}
-                <div class="data-item">
+                <div class="data-item" data-id="{{this.id}}">
+                    <button class="delete-btn" title="Delete" onclick="deleteRecord({{this.id}})">&times;</button>
                     <div class="data-row">
                         <div>
                             <div class="data-label">ID</div>
@@ -367,6 +399,83 @@
             items.forEach(item => {
                 const text = item.textContent.toLowerCase();
                 item.style.display = text.includes(filter) ? '' : 'none';
+            });
+        }
+
+
+        function showSnackbar(message, options = {}) {
+            const snackbar = document.getElementById('matrix-snackbar');
+            const msgSpan = document.getElementById('matrix-snackbar-message');
+            const closeBtn = document.getElementById('matrix-snackbar-close');
+            const confirmBtn = document.getElementById('matrix-snackbar-confirm');
+            msgSpan.textContent = message;
+            snackbar.style.display = 'block';
+            confirmBtn.style.display = options.confirm ? 'inline-block' : 'none';
+            closeBtn.style.display = (!options.confirm && message.toLowerCase().includes('failed to delete')) ? 'inline-block' : 'none';
+            let hideTimeout;
+            setTimeout(() => {
+                snackbar.style.opacity = '1';
+                snackbar.style.bottom = '60px';
+            }, 10);
+            function hideSnackbar() {
+                snackbar.style.opacity = '0';
+                snackbar.style.bottom = '40px';
+                setTimeout(() => {
+                    snackbar.style.display = 'none';
+                }, 300);
+            }
+            closeBtn.onclick = function() {
+                if (hideTimeout) clearTimeout(hideTimeout);
+                hideSnackbar();
+            };
+            if (options.confirm) {
+                confirmBtn.onclick = function() {
+                    hideSnackbar();
+                    options.onConfirm && options.onConfirm();
+                };
+            } else if (closeBtn.style.display === 'inline-block') {
+                // Only auto-hide if not showing close button
+                hideTimeout = setTimeout(hideSnackbar, 2500);
+            }
+        }
+
+        function deleteRecord(id) {
+            showSnackbar('Are you sure you want to delete this record?', {
+                confirm: true,
+                onConfirm: function() {
+                    fetch('/records/delete', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ lowerLimit: id })
+                    })
+                    .then(res => {
+                        if (res.ok) {
+                            const card = document.querySelector('.data-item[data-id="' + id + '"]');
+                            if (card) card.remove();
+                            // Check if there are any data-item elements left
+                            setTimeout(() => {
+                                const items = document.querySelectorAll('.data-item');
+                                if (items.length === 0) {
+                                    const grid = document.querySelector('.data-grid');
+                                    if (grid && !document.querySelector('.empty-state')) {
+                                        const emptyDiv = document.createElement('div');
+                                        emptyDiv.className = 'empty-state';
+                                        emptyDiv.innerHTML = 'NO DATA AVAILABLE IN THE SYSTEM';
+                                        grid.appendChild(emptyDiv);
+                                    }
+                                    // Remove Export CSV button if present
+                                    const exportBtn = document.querySelector('.export-btn');
+                                    if (exportBtn) exportBtn.remove();
+                                }
+                            }, 100);
+                        } else {
+                            showSnackbar('Failed to delete record.');
+                        }
+                    })
+                    .catch(() => showSnackbar('Failed to delete record.'));
+                }
             });
         }
     </script>

