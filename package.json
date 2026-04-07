@@ -2,11 +2,20 @@
   "name": "offser",
   "version": "1.0.0",
   "description": "A TypeScript Express server for email delivery, template rendering, and database management — for authorized security testing.",
-  "keywords": ["security", "pentest", "smtp", "email", "express", "mysql", "red-team", "offensive-security"],
+  "keywords": [
+    "security",
+    "pentest",
+    "smtp",
+    "email",
+    "express",
+    "mysql",
+    "red-team",
+    "offensive-security"
+  ],
   "author": "marcomg-byte",
   "repository": {
     "type": "git",
-    "url": "https://github.com/marcomg-byte/offser"
+    "url": "git+https://github.com/marcomg-byte/offser.git"
   },
   "main": "cli/index.js",
   "bin": {
