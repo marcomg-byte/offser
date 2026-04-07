@@ -4,6 +4,10 @@
   "description": "A TypeScript Express server for email delivery, template rendering, and database management — for authorized security testing.",
   "keywords": ["security", "pentest", "smtp", "email", "express", "mysql", "red-team", "offensive-security"],
   "author": "marcomg-byte",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marcomg-byte/offser"
+  },
   "main": "cli/index.js",
   "bin": {
     "offser": "cli/index.js"
@@ -25,7 +29,7 @@
     "dev": "concurrently \"npm run watch:templates\" \"nodemon --watch src --ext ts --exec tsx src/index.ts\"",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
-    "prepare": "npm run clean && npm run build",
+    "prepare": "npm run bundle:cli",
     "start": "node dist/index.js",
     "start:container": "docker run --env-file .env.container -p 8080:8080 -v $(pwd)/certs:/app/certs offser",
     "test": "vitest",
