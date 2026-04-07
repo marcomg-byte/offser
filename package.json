@@ -17,6 +17,10 @@
     "type": "git",
     "url": "git+https://github.com/marcomg-byte/offser.git"
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "main": "cli/index.js",
   "bin": {
     "offser": "cli/index.js"
