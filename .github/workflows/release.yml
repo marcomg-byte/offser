@@ -81,3 +81,8 @@ jobs:
         with:
           tag_name: ${{ steps.check_tag.outputs.next_tag }}
           generate_release_notes: true
+
+      - name: Add "released" label to PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr edit ${{ github.event.pull_request.number }} --add-label "released"
