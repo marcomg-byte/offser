@@ -1268,4 +1268,34 @@ This project uses automated GitHub Actions workflows for versioned releases and 
   offser --help
   ```
 
-For more details, see the `.github/workflows/release.yml` and `.github/workflows/publish.yml` files.
+
+## GitHub Workflows
+
+This project uses GitHub Actions for automated CI, release management, and npm publishing. The workflows are defined in `.github/workflows/`:
+
+### 1. CI Workflow (`ci.yml`)
+- **Trigger:** On every pull request to the `main` branch
+- **Steps:**
+  - Checks out the code
+  - Sets up Node.js using the version in `.nvmrc`
+  - Installs dependencies with `npm ci`
+  - Runs all tests (`npm run test:run`)
+  - Performs a dry run of `npm publish` to verify publishability
+
+### 2. Release Workflow (`release.yml`)
+- **Trigger:** When a pull request is closed and merged into `main` with a `major`, `minor`, or `patch` label
+- **Steps:**
+  - Checks out the code with full history
+  - Determines the version bump type based on PR labels
+  - (Further steps may include version bumping, changelog generation, and tagging)
+
+### 3. Publish Workflow (`publish.yml`)
+- **Trigger:** On push of a tag matching the pattern `v*.*.*`
+- **Steps:**
+  - Checks out the code
+  - Sets up Node.js using `.nvmrc`
+  - Installs dependencies with `npm ci`
+  - Publishes the package to npm with provenance
+  - Uses the `NODE_AUTH_TOKEN` secret for authentication
+
+For more details, see the workflow files in `.github/workflows/`.
