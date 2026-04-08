@@ -1,6 +1,6 @@
 name: Publish
 
-on: 
+on:
   push:
     tags:
       - "v*.*.*"
@@ -12,23 +12,21 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           registry-url: https://registry.npmjs.org/
 
-      - name: Install
+      - name: Install dependencies
         run: npm ci
 
-      - name: Publish
+      - name: Publish to npm
         run: npm publish --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
