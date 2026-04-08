@@ -1236,3 +1236,35 @@ Contributions are welcome! Please follow these guidelines:
 - [Pino](https://github.com/pinojs/pino) - Fast logger
 - [Vitest](https://vitest.dev/) - Testing framework
 - [MySQL](https://www.mysql.com/) - Database system
+
+## Release & npm Package
+
+This project uses automated GitHub Actions workflows for versioned releases and npm publishing:
+
+- **Release workflow**: When a pull request is merged into `main` with the label `patch`, `minor`, or `major`, the version is automatically bumped, a git tag is created, and a GitHub Release is published. The merged pull request also receives a `released` label.
+- **Publish workflow**: When a new version tag (e.g., `v1.2.3`) is pushed, the package is built and published to the [npm registry](https://www.npmjs.com/package/offser) using the trusted publisher connection.
+
+### How to trigger a release
+
+1. Open a pull request to `main` with your changes.
+2. Add one of the labels: `patch`, `minor`, or `major` to the PR (according to [semantic versioning](https://semver.org/)).
+3. Merge the PR.
+4. The workflows will:
+   - Bump the version in `package.json` and create a git tag.
+   - Publish a GitHub Release.
+   - Build and publish the new version to npm.
+   - Add the `released` label to the PR.
+
+### npm Package
+
+- **Registry:** [https://www.npmjs.com/package/offser](https://www.npmjs.com/package/offser)
+- **Install:**
+  ```sh
+  npm install -g offser
+  ```
+- **Usage:**
+  ```sh
+  offser --help
+  ```
+
+For more details, see the `.github/workflows/release.yml` and `.github/workflows/publish.yml` files.
