@@ -49,3 +49,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.bump-version.outputs.newTag }}
+
+      - name: Add released label to PR
+        if: always()
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: released
+          number: ${{ github.event.pull_request.number }}
