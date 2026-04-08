@@ -13,23 +13,21 @@ jobs:
 
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Get PR labels
-        id: labels
-        uses: actions-ecosystem/action-get-labels@v1
-
       - name: Set release type
         id: set_release_type
         run: |
-          if echo "${{ steps.labels.outputs.labels }}" | grep -q "major"; then
+          LABELS='${{ toJSON(github.event.pull_request.labels.*.name) }}'
+          if echo "$LABELS" | jq -e 'contains(["major"])' > /dev/null; then
             echo "type=major" >> $GITHUB_OUTPUT
-          elif echo "${{ steps.labels.outputs.labels }}" | grep -q "minor"; then
+          elif echo "$LABELS" | jq -e 'contains(["minor"])' > /dev/null; then
             echo "type=minor" >> $GITHUB_OUTPUT
-          elif echo "${{ steps.labels.outputs.labels }}" | grep -q "patch"; then
+          elif echo "$LABELS" | jq -e 'contains(["patch"])' > /dev/null; then
             echo "type=patch" >> $GITHUB_OUTPUT
           else
             echo "type=none" >> $GITHUB_OUTPUT
@@ -40,6 +38,7 @@ jobs:
         run: exit 0
 
       - name: Bump version and tag
+        id: bump-version
         uses: phips28/gh-action-bump-version@v11.0.2
         with:
           tag-prefix: "v"
@@ -52,8 +51,12 @@ jobs:
 
       - name: Add released label to PR
         if: always()
-        uses: actions-ecosystem/action-add-labels@v1
+        uses: actions/github-script@v7
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: released
-          number: ${{ github.event.pull_request.number }}
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              labels: ['released']
+            })
