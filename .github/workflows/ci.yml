@@ -1,17 +1,16 @@
-name: Publish
+name: CI
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  publish:
+  ci:
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
-      id-token: write
 
     steps:
       - name: Checkout
@@ -26,7 +25,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Publish to npm
-        run: npm publish --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+      - name: Run tests
+        run: npm run test:run
+
+      - name: Publish dry run
+        run: npm publish --dry-run
