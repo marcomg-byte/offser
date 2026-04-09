@@ -129,16 +129,29 @@ jobs:
       - name: Bump version and create tag
         id: bump
         if: steps.check_tag.outputs.exists != 'true'
-        uses: phips28/gh-action-bump-version@v11.0.2
-        with:
-          tag-prefix: "v"
-          version-type: ${{ steps.version_type.outputs.type }}
+        env:
+          BYPASS_TOKEN: ${{ secrets.BYPASS_REPO_RULES_TOKEN }}
+        run: |
+          # Bump version in package.json
+          npm version ${{ steps.version_type.outputs.type }} --no-git-tag-version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          
+          # Commit the version change
+          git add package.json package-lock.json
+          git commit -m "ci: version bump to v${NEW_VERSION}"
+          
+          # Create and push tag
+          git tag "v${NEW_VERSION}"
+          git push "https://x-access-token:${BYPASS_TOKEN}@github.com/${{ github.repository }}.git" HEAD:main
+          git push "https://x-access-token:${BYPASS_TOKEN}@github.com/${{ github.repository }}.git" "v${NEW_VERSION}"
+          
+          echo "newTag=v${NEW_VERSION}" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         if: steps.check_tag.outputs.exists != 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.check_tag.outputs.next_tag }}
+          tag_name: ${{ steps.bump.outputs.newTag }}
           generate_release_notes: true
 
       - name: Add "released" label to PR
