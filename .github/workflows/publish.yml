@@ -1,10 +1,9 @@
 name: Publish
 
 on:
-  workflow_run:
-    workflows: ["Release"]
-    types:
-      - completed
+  push:
+    tags:
+      - 'v*.*.*'
   pull_request:
     branches:
       - main
@@ -34,7 +33,7 @@ jobs:
         run: npm publish --dry-run
 
   publish:
-    if: github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
     permissions:
