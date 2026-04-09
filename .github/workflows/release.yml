@@ -149,6 +149,12 @@ jobs:
           tag_name: ${{ steps.bump.outputs.newTag }}
           generate_release_notes: true
 
+      - name: Trigger publish workflow
+        if: steps.check_tag.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run publish.yml --ref ${{ steps.bump.outputs.newTag }}
+
       - name: Add "released" label to PR
         env:
           GH_TOKEN: ${{ github.token }}
