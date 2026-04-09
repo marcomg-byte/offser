@@ -37,12 +37,12 @@ The author(s) assume **no liability** for any misuse, damage, or illegal activit
 
 ## Project Structure
 
+
 ```
 .
 ├── assets/
+│   ├── facebook.ico
 │   └── matrix.ico
-├── backup/
-│   └── logs/                # (if present at runtime)
 ├── certs/
 │   ├── db/
 │   │   ├── ca-cert.pem
@@ -56,86 +56,29 @@ The author(s) assume **no liability** for any misuse, damage, or illegal activit
 │   ├── offser_passwords.sql
 │   ├── offser_routines.sql
 │   └── README.md
+├── logs/
+│   ├── debug.log
+│   ├── error.log
+│   ├── info.log
+│   └── warn.log
 ├── src/
 │   ├── __mocks__/
-│   │   ├── index.ts
-│   │   ├── nodemailer.ts
-│   │   └── server.ts
 │   ├── config/
-│   │   ├── __mocks__/
-│   │   │   └── env.ts
-│   │   ├── env.spec.ts
-│   │   └── env.ts
 │   ├── controllers/
-│   │   ├── app.controller.ts
-│   │   ├── db.controller.ts
-│   │   ├── index.ts
-│   │   ├── mail.controller.spec.ts
-│   │   ├── mail.controller.ts
-│   │   ├── template.controller.spec.ts
-│   │   └── template.controller.ts
 │   ├── errors/
-│   │   ├── db.error.ts
-│   │   ├── index.ts
-│   │   ├── mail.error.ts
-│   │   ├── server.error.ts
-│   │   ├── template.error.ts
-│   │   └── types/
-│   │       ├── error.ts
-│   │       └── index.ts
 │   ├── index.ts
 │   ├── middleware/
-│   │   ├── error.middleware.spec.ts
-│   │   ├── error.middleware.ts
-│   │   ├── index.ts
-│   │   ├── not-found.middleware.spec.ts
-│   │   └── not-found.middleware.ts
 │   ├── routes/
-│   │   ├── app.routes.ts
-│   │   ├── db.routes.ts
-│   │   ├── health.routes.spec.ts
-│   │   ├── health.routes.ts
-│   │   ├── index.ts
-│   │   ├── mail.routes.ts
-│   │   └── template.routes.ts
 │   ├── schemas/
-│   │   ├── __mocks__/
-│   │   │   └── index.ts
-│   │   ├── app.schema.ts
-│   │   ├── db.schema.ts
-│   │   ├── index.ts
-│   │   ├── mail.schema.spec.ts
-│   │   ├── mail.schema.ts
-│   │   ├── template.schema.spec.ts
-│   │   └── template.schema.ts
 │   ├── services/
-│   │   ├── __mocks__/
-│   │   │   └── index.ts
-│   │   ├── db.service.spec.ts
-│   │   ├── db.service.ts
-│   │   ├── index.ts
-│   │   ├── mail.service.spec.ts
-│   │   ├── mail.service.ts
-│   │   ├── template.service.spec.ts
-│   │   └── template.service.ts
 │   ├── templates/
-│   │   ├── dashboard.hbs
-│   │   ├── not-found.hbs
-│   │   ├── offers.hbs
-│   │   ├── sales.hbs
-│   │   └── shipment.hbs
 │   └── utils/
-│       ├── __mocks__/
-│       │   └── (if present)
-│       ├── error.util.spec.ts
-│       ├── error.util.ts
-│       ├── format.util.spec.ts
-│       ├── format.util.ts
-│       ├── index.ts
-│       ├── logger.util.spec.ts
-│       ├── logger.util.ts
-│       ├── shutdown.util.spec.ts
-│       └── shutdown.util.ts
+├── .github/
+│   └── workflows/
+│       ├── ci.yml
+│       ├── cd.yml
+│       ├── publish.yml
+│       └── release.yml
 ├── .dockerignore
 ├── .env
 ├── .env.container
@@ -1271,7 +1214,7 @@ This project uses automated GitHub Actions workflows for versioned releases and 
 
 ## GitHub Workflows
 
-This project uses GitHub Actions for automated CI, release management, and npm publishing. The workflows are defined in `.github/workflows/`:
+This project uses GitHub Actions for automated CI, container validation, release management, and npm publishing. The workflows are defined in `.github/workflows/`:
 
 ### 1. CI Workflow (`ci.yml`)
 - **Trigger:** On every pull request to the `main` branch
@@ -1282,20 +1225,31 @@ This project uses GitHub Actions for automated CI, release management, and npm p
   - Runs all tests (`npm run test:run`)
   - Performs a dry run of `npm publish` to verify publishability
 
-### 2. Release Workflow (`release.yml`)
-- **Trigger:** When a pull request is closed and merged into `main` with a `major`, `minor`, or `patch` label
+### 2. CD Workflow (`cd.yml`)
+- **Trigger:** On every pull request to the `main` branch
+- **Steps:**
+  - Checks out the code
+  - Sets up Node.js using `.nvmrc`
+  - Installs dependencies (ignoring scripts)
+  - Bundles the container (`npm run bundle:container`)
+  - Builds the container image (`npm run build:container`)
+
+### 3. Release Workflow (`release.yml`)
+- **Trigger:** On pull request events (opened, synchronized, reopened, closed) to `main`
 - **Steps:**
   - Checks out the code with full history
-  - Determines the version bump type based on PR labels
-  - (Further steps may include version bumping, changelog generation, and tagging)
+  - Determines the version bump type based on PR labels (`major`, `minor`, `patch`)
+  - (Further steps may include version bumping, changelog generation, tagging, and release publishing)
 
-### 3. Publish Workflow (`publish.yml`)
-- **Trigger:** On push of a tag matching the pattern `v*.*.*`
+### 4. Publish Workflow (`publish.yml`)
+- **Trigger:**
+  - On push of a tag matching the pattern `v*.*.*`
+  - On pull request to `main` (dry run)
 - **Steps:**
   - Checks out the code
   - Sets up Node.js using `.nvmrc`
   - Installs dependencies with `npm ci`
-  - Publishes the package to npm with provenance
-  - Uses the `NODE_AUTH_TOKEN` secret for authentication
+  - For PRs: Performs a dry run of `npm publish`
+  - For tags: Publishes the package to npm with provenance using the `NODE_AUTH_TOKEN` secret
 
 For more details, see the workflow files in `.github/workflows/`.
