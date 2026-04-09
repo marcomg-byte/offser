@@ -1,0 +1,31 @@
+name: CD
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  container:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Bundle container
+        run: npm run bundle:container
+
+      - name: Build container image
+        run: npm run build:container
