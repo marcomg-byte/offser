@@ -29,6 +29,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Bump version (dry run, no git tag)
+        run: |
+          if ${{ contains(github.event.pull_request.labels.*.name, 'major') }}; then
+            npm version major --no-git-tag-version
+          elif ${{ contains(github.event.pull_request.labels.*.name, 'minor') }}; then
+            npm version minor --no-git-tag-version
+          elif ${{ contains(github.event.pull_request.labels.*.name, 'patch') }}; then
+            npm version patch --no-git-tag-version
+          else
+            echo "No version bump label (major/minor/patch) found -- skipping version bump."
+          fi
+
       - name: Publish dry run
         run: npm publish --dry-run
 
