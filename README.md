@@ -37,12 +37,13 @@ The author(s) assume **no liability** for any misuse, damage, or illegal activit
 
 ## Project Structure
 
-
 ```
 .
 ├── assets/
 │   ├── facebook.ico
 │   └── matrix.ico
+├── backup/
+│   └── logs/                # (if present at runtime)
 ├── certs/
 │   ├── db/
 │   │   ├── ca-cert.pem
@@ -56,27 +57,90 @@ The author(s) assume **no liability** for any misuse, damage, or illegal activit
 │   ├── offser_passwords.sql
 │   ├── offser_routines.sql
 │   └── README.md
-├── logs/
-│   ├── debug.log
-│   ├── error.log
-│   ├── info.log
-│   └── warn.log
 ├── src/
 │   ├── __mocks__/
+│   │   ├── index.ts
+│   │   ├── nodemailer.ts
+│   │   └── server.ts
 │   ├── config/
+│   │   ├── __mocks__/
+│   │   │   └── env.ts
+│   │   ├── env.spec.ts
+│   │   └── env.ts
 │   ├── controllers/
+│   │   ├── app.controller.ts
+│   │   ├── db.controller.ts
+│   │   ├── index.ts
+│   │   ├── mail.controller.spec.ts
+│   │   ├── mail.controller.ts
+│   │   ├── template.controller.spec.ts
+│   │   └── template.controller.ts
 │   ├── errors/
+│   │   ├── db.error.ts
+│   │   ├── index.ts
+│   │   ├── mail.error.ts
+│   │   ├── server.error.ts
+│   │   ├── template.error.ts
+│   │   └── types/
+│   │       ├── error.ts
+│   │       └── index.ts
 │   ├── index.ts
 │   ├── middleware/
+│   │   ├── error.middleware.spec.ts
+│   │   ├── error.middleware.ts
+│   │   ├── index.ts
+│   │   ├── not-found.middleware.spec.ts
+│   │   └── not-found.middleware.ts
 │   ├── routes/
+│   │   ├── app.routes.ts
+│   │   ├── db.routes.ts
+│   │   ├── health.routes.spec.ts
+│   │   ├── health.routes.ts
+│   │   ├── index.ts
+│   │   ├── mail.routes.ts
+│   │   └── template.routes.ts
 │   ├── schemas/
+│   │   ├── __mocks__/
+│   │   │   └── index.ts
+│   │   ├── app.schema.ts
+│   │   ├── db.schema.ts
+│   │   ├── index.ts
+│   │   ├── mail.schema.spec.ts
+│   │   ├── mail.schema.ts
+│   │   ├── template.schema.spec.ts
+│   │   └── template.schema.ts
 │   ├── services/
+│   │   ├── __mocks__/
+│   │   │   └── index.ts
+│   │   ├── db.service.spec.ts
+│   │   ├── db.service.ts
+│   │   ├── index.ts
+│   │   ├── mail.service.spec.ts
+│   │   ├── mail.service.ts
+│   │   ├── template.service.spec.ts
+│   │   └── template.service.ts
 │   ├── templates/
+│   │   ├── dashboard.hbs
+│   │   ├── not-found.hbs
+│   │   ├── offers.hbs
+│   │   ├── sales.hbs
+│   │   └── shipment.hbs
 │   └── utils/
+│       ├── __mocks__/
+│       │   └── (if present)
+│       ├── error.util.spec.ts
+│       ├── error.util.ts
+│       ├── format.util.spec.ts
+│       ├── format.util.ts
+│       ├── index.ts
+│       ├── logger.util.spec.ts
+│       ├── logger.util.ts
+│       ├── shutdown.util.spec.ts
+│       └── shutdown.util.ts
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml
-│       ├── cd.yml
+│       ├── container.yml
 │       ├── publish.yml
 │       └── release.yml
 ├── .dockerignore
@@ -85,6 +149,7 @@ The author(s) assume **no liability** for any misuse, damage, or illegal activit
 ├── .env.example
 ├── .gitignore
 ├── .prettierrc
+├── .nvmrc
 ├── Dockerfile
 ├── LICENSE
 ├── README.md
