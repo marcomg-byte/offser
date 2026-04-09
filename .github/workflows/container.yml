@@ -1,4 +1,4 @@
-name: Container
+name: CD
 
 on:
   pull_request:
