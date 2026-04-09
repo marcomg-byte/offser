@@ -2,7 +2,7 @@ name: Release
 
 on:
   pull_request:
-    types: [closed]
+    types: [opened, synchronize, reopened, closed]
     branches:
       - main
 
@@ -11,6 +11,56 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  release-check:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version bump type (dry run)
+        id: version_type
+        run: |
+          if ${{ contains(github.event.pull_request.labels.*.name, 'major') }}; then
+            echo "type=major"
+          elif ${{ contains(github.event.pull_request.labels.*.name, 'minor') }}; then
+            echo "type=minor"
+          elif ${{ contains(github.event.pull_request.labels.*.name, 'patch') }}; then
+            echo "type=patch"
+          else
+            echo "No version bump label (major/minor/patch) found -- release would be skipped."
+            exit 0
+          fi
+
+      - name: Compute next version (dry run)
+        run: |
+          current=$(node -p "require('./package.json').version")
+          current="${current%%-*}"
+          current="${current%%+*}"
+          IFS='.' read -r major minor patch <<< "$current"
+          if ${{ contains(github.event.pull_request.labels.*.name, 'major') }}; then
+            next="$((major + 1)).0.0"
+          elif ${{ contains(github.event.pull_request.labels.*.name, 'minor') }}; then
+            next="${major}.$((minor + 1)).0"
+          elif ${{ contains(github.event.pull_request.labels.*.name, 'patch') }}; then
+            next="${major}.${minor}.$((patch + 1))"
+          else
+            echo "No bump label -- next version unchanged: ${current}"
+            exit 0
+          fi
+          git fetch --tags
+          if git rev-parse --verify "v${next}" 2>/dev/null; then
+            echo "Tag v${next} already exists -- release would be skipped."
+          else
+            echo "Release dry run: would bump version to v${next} and create a GitHub Release."
+          fi
+
   release:
     if: >
       github.event.pull_request.merged == true &&
