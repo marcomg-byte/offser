@@ -49,7 +49,7 @@ jobs:
           elif ${{ contains(github.event.pull_request.labels.*.name, 'minor') }}; then
             next="${major}.$((minor + 1)).0"
           elif ${{ contains(github.event.pull_request.labels.*.name, 'patch') }}; then
-            next="${major}.${minor}.$((patch + 1))"
+            next="${major}.${minor}.$((patch + 1)}"
           else
             echo "No bump label -- next version unchanged: ${current}"
             exit 0
@@ -113,7 +113,7 @@ jobs:
           elif [ "$type" = "minor" ]; then
             next="${major}.$((minor + 1)).0"
           else
-            next="${major}.${minor}.$((patch + 1))"
+            next="${major}.${minor}.$((patch + 1)}"
           fi
           echo "next_tag=v${next}" >> $GITHUB_OUTPUT
           git fetch --tags
@@ -138,7 +138,6 @@ jobs:
           
           # Create and push tag
           git tag "v${NEW_VERSION}"
-          git push origin HEAD:main
           git push origin "v${NEW_VERSION}"
           
           echo "newTag=v${NEW_VERSION}" >> $GITHUB_OUTPUT
