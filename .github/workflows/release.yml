@@ -6,6 +6,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   release:
     if: >
@@ -38,15 +42,47 @@ jobs:
             echo "type=patch" >> $GITHUB_OUTPUT
           fi
 
+      - name: Check if next tag already exists
+        id: check_tag
+        run: |
+          current=$(node -p "require('./package.json').version")
+          # Strip pre-release/build metadata suffixes (e.g. 1.2.3-alpha or 1.2.3+build)
+          current="${current%%-*}"
+          current="${current%%+*}"
+          IFS='.' read -r major minor patch <<< "$current"
+          type="${{ steps.version_type.outputs.type }}"
+          if [ "$type" = "major" ]; then
+            next="$((major + 1)).0.0"
+          elif [ "$type" = "minor" ]; then
+            next="${major}.$((minor + 1)).0"
+          else
+            next="${major}.${minor}.$((patch + 1))"
+          fi
+          echo "next_tag=v${next}" >> $GITHUB_OUTPUT
+          git fetch --tags
+          if git rev-parse --verify "v${next}" 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Tag v${next} already exists -- skipping bump and release."
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Bump version and create tag
         id: bump
+        if: steps.check_tag.outputs.exists != 'true'
         uses: phips28/gh-action-bump-version@v11.0.2
         with:
           tag-prefix: "v"
           version-type: ${{ steps.version_type.outputs.type }}
 
       - name: Create GitHub Release
+        if: steps.check_tag.outputs.exists != 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.bump.outputs.newTag }}
+          tag_name: ${{ steps.check_tag.outputs.next_tag }}
           generate_release_notes: true
+
+      - name: Add "released" label to PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr edit ${{ github.event.pull_request.number }} --add-label "released"
