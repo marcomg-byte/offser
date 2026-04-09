@@ -1266,7 +1266,7 @@ This project uses automated GitHub Actions workflows for versioned releases and 
 
 ### npm Package
 
-- **Current Version:** 1.1.3.
+- **Current Version:** 1.1.4
 - **Registry:** [https://www.npmjs.com/package/offser](https://www.npmjs.com/package/offser)
 - **Install:**
   ```sh
