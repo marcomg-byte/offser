@@ -77,15 +77,24 @@ jobs:
 
       - name: Bump version and create tag
         run: |
-          if ${{ contains(github.event.pull_request.labels.*.name, 'major') }}; then
-            npm version major
-          elif ${{ contains(github.event.pull_request.labels.*.name, 'minor') }}; then
-            npm version minor
+          if [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref_type }}" == "tag" ]; then
+            # If triggered by tag push, use the existing tag version
+            VERSION="${{ github.ref_name }}"
+            VERSION="${VERSION#v}"  # Remove 'v' prefix
+            npm version $VERSION --no-git-tag-version --allow-same-version
           else
-            npm version patch
+            # If workflow_dispatch, create new version and tag
+            if ${{ contains(github.event.pull_request.labels.*.name, 'major') }}; then
+              npm version major
+            elif ${{ contains(github.event.pull_request.labels.*.name, 'minor') }}; then
+              npm version minor
+            else
+              npm version patch
+            fi
           fi
 
       - name: Push tag
+        if: github.event_name == 'workflow_dispatch'
         run: git push origin "$(git describe --abbrev=0 --tags)"
 
       - name: Publish to npm
