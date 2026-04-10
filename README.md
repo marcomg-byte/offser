@@ -1266,7 +1266,7 @@ This project uses automated GitHub Actions workflows for versioned releases and 
 
 ### npm Package
 
-- **Current Version:** 1.1.4
+- **Current Version:** 1.1.5
 - **Registry:** [https://github.com/marcomg-byte/offser/pkgs/npm/offser](https://github.com/marcomg-byte/offser/pkgs/npm/offser)
 - **Install:**
   ```sh
