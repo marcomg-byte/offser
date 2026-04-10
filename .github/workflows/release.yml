@@ -152,10 +152,10 @@ jobs:
       - name: Trigger publish workflow
         if: steps.check_tag.outputs.exists != 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: gh workflow run publish.yml --ref ${{ steps.bump.outputs.newTag }}
 
       - name: Add "released" label to PR
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: gh pr edit ${{ github.event.pull_request.number }} --add-label "released"
