@@ -72,59 +72,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Check version and determine if bump is needed
+      - name: Check if version is already published
         id: check-version
         run: |
-          function compare_versions() {
-            local current=${1#v};
-            local new=${2#v};
-            local major_current=$(echo "$current" | cut -d. -f1)
-            local minor_current=$(echo "$current" | cut -d. -f2)
-            local patch_current=$(echo "$current" | cut -d. -f3)
-            local major_new=$(echo "$new" | cut -d. -f1)
-            local minor_new=$(echo "$new" | cut -d. -f2)
-            local patch_new=$(echo "$new" | cut -d. -f3)
-
-            if [ "$major_new" -gt "$major_current" ]; then
-              echo "major"
-            elif [ "$minor_new" -gt "$minor_current" ]; then
-              echo "minor"
-            elif [ "$patch_new" -gt "$patch_current" ]; then
-              echo "patch"
-            else
-              echo "none"
-            fi
-          }
-
-          NEW_VERSION="${GITHUB_REF#refs/tags/v}"
-          LATEST_PUBLISHED=$(npm view offser version 2>/dev/null || echo "0.0.0")
+          VERSION=$(node -p "require('./package.json').version")
           PUBLISHED_VERSIONS=$(npm view offser versions --json 2>/dev/null || echo "[]")
-          HAS_BEEN_PUBLISHED=false
-
-          if echo "$PUBLISHED_VERSIONS" | jq -e --arg v "$NEW_VERSION" 'contains([$v])' > /dev/null; then
-            HAS_BEEN_PUBLISHED=true
+          if echo "$PUBLISHED_VERSIONS" | jq -e --arg v "$VERSION" 'contains([$v])' > /dev/null; then
+            echo "Version $VERSION is already published -- skipping publish."
+            echo "already_published=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version $VERSION is not yet published -- proceeding."
+            echo "already_published=false" >> $GITHUB_OUTPUT
           fi
-
-          if [ "$HAS_BEEN_PUBLISHED" = true ]; then
-            echo "Version $NEW_VERSION has already been published."
-            echo "Generating new version by incrementing..."
-            TARGETED_BUMP=$(compare_versions "$LATEST_PUBLISHED" "$NEW_VERSION")
-            if [ "$TARGETED_BUMP" = "major" ]; then
-              npm version major --no-git-tag-version;
-            elif [ "$TARGETED_BUMP" = "minor" ]; then
-              npm version minor --no-git-tag-version;
-            elif [ "$TARGETED_BUMP" = "patch" ]; then
-              npm version patch --no-git-tag-version;
-            else
-              echo "Error: version $NEW_VERSION is already published and no bump type could be determined."
-              exit 1
-            fi
-          fi
-
-          FINAL_VERSION=$(node -p "require('./package.json').version")
-          echo "Version $FINAL_VERSION determined. Proceeding with publish."
 
       - name: Publish to npm
+        if: steps.check-version.outputs.already_published != 'true'
         run: npm publish --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
