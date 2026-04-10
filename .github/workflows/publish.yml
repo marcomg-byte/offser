@@ -70,25 +70,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Bump version
-        run: |
-          if ${{ contains(github.event.pull_request.labels.*.name, 'major') }}; then
-            npm version major --no-git-tag-version
-          elif ${{ contains(github.event.pull_request.labels.*.name, 'minor') }}; then
-            npm version minor --no-git-tag-version
-          else
-            npm version patch --no-git-tag-version
-          fi
-
-      - name: Commit and push version bump
+      - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json
-          if [ -f package-lock.json ]; then
-            git add package-lock.json
+
+      - name: Bump version and create tag
+        run: |
+          if ${{ contains(github.event.pull_request.labels.*.name, 'major') }}; then
+            npm version major
+          elif ${{ contains(github.event.pull_request.labels.*.name, 'minor') }}; then
+            npm version minor
+          else
+            npm version patch
           fi
-          git diff --cached --quiet || (git commit -m "chore: bump version [skip ci]" && git push)
+
+      - name: Push tag
+        run: git push origin "$(git describe --abbrev=0 --tags)"
 
       - name: Publish to npm
         run: npm publish --provenance
