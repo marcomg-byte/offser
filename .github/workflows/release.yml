@@ -150,6 +150,7 @@ jobs:
           generate_release_notes: true
 
       - name: Add "released" label to PR
+        if: steps.check_tag.outputs.exists != 'true'
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: gh pr edit ${{ github.event.pull_request.number }} --add-label "released"
