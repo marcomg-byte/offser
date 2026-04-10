@@ -1008,7 +1008,7 @@ Coverage reports are generated in the `coverage/` directory with:
 Install Offser globally to use as a command-line tool:
 
 ```sh
-npm install -g offser
+npm install -g @marcomg-byte/offser
 ```
 
 This makes the `offser` command available system-wide.
@@ -1251,7 +1251,7 @@ Contributions are welcome! Please follow these guidelines:
 This project uses automated GitHub Actions workflows for versioned releases and npm publishing:
 
 - **Release workflow**: When a pull request is merged into `main` with the label `patch`, `minor`, or `major`, the version is automatically bumped, a git tag is created, and a GitHub Release is published. The merged pull request also receives a `released` label.
-- **Publish workflow**: When a new version tag (e.g., `v1.2.3`) is pushed, the package is built and published to the [npm registry](https://www.npmjs.com/package/offser) using the trusted publisher connection.
+- **Publish workflow**: When a new version tag (e.g., `v1.2.3`) is pushed, the package is built and published to [GitHub Packages](https://github.com/marcomg-byte/offser/pkgs/npm/offser) using the built-in `GITHUB_TOKEN`.
 
 ### How to trigger a release
 
@@ -1266,11 +1266,11 @@ This project uses automated GitHub Actions workflows for versioned releases and 
 
 ### npm Package
 
-- **Current Version:** 1.1.5
-- **Registry:** [https://www.npmjs.com/package/offser](https://www.npmjs.com/package/offser)
+- **Current Version:** 1.1.4
+- **Registry:** [https://github.com/marcomg-byte/offser/pkgs/npm/offser](https://github.com/marcomg-byte/offser/pkgs/npm/offser)
 - **Install:**
   ```sh
-  npm install -g offser
+  npm install -g @marcomg-byte/offser
   ```
 - **Usage:**
   ```sh
