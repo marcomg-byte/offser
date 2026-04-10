@@ -72,6 +72,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check version not already published
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          PUBLISHED_VERSIONS=$(npm view offser versions --json 2>/dev/null || echo "[]")
+          if echo "$PUBLISHED_VERSIONS" | grep -q "\"$CURRENT_VERSION\""; then
+            echo "Error: Version $CURRENT_VERSION already published to npm. Please bump the version before publishing."
+            exit 1
+          fi
+          echo "Version $CURRENT_VERSION is new. Proceeding with publish."
+
       - name: Publish to npm
         run: npm publish --provenance
         env:
